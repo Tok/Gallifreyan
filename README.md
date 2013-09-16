@@ -19,6 +19,8 @@ Circular Gallifreyan Transliterator
 
 This application is running on OpenShift at: http://gallifreyan-9000.rhcloud.com
 
+---------------------------------------
+
 Frameworks and Technologies:
 * Scala
 * Vaadin 7 (user interface)
@@ -26,10 +28,19 @@ Frameworks and Technologies:
 * Maven (build and reporting)
 * Tomcat 7 (for [standalone version](/deployments/standalone/gallifreyan) only)
 
+---------------------------------------
+
 Important Classes:
 
 [Drawing-Util](/src/main/scala/gallifreyan/util/DrawUtil.scala)
 
+[Drawing-Util](/src/main/scala/gallifreyan/util/CalcUtil.scala)
+
+[Text-Util](/src/main/scala/gallifreyan/util/TextUtil.scala)
+
+[Init-Class](/src/main/scala/gallifreyan/GallifreyanInit.scala)
+
+---------------------------------------
 
 Doctor Who and the concept of Gallifreyan are © BBC (http://www.bbc.co.uk/)
 
