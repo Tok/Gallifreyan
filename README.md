@@ -28,8 +28,9 @@ Frameworks and Technologies:
 
 Important Classes:
 
-[Drawing](/src/main/scala/gallifreyan/util/DrawUtil.scala)
+[Drawing-Util](/src/main/scala/gallifreyan/util/DrawUtil.scala)
 
 
 Doctor Who and the concept of Gallifreyan are © BBC (http://www.bbc.co.uk/)
+
 The Circular Gallifreyan Alphabet is © Loren Sherman (http://www.shermansplanet.com/gallifreyan)
