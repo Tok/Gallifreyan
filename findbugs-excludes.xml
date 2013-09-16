@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<FindBugsFilter>
+  <!-- Gerneral filters for all classes -->
+  <Match>
+    <!-- False positive on case objects -->
+    <Bug pattern="HE_HASHCODE_USE_OBJECT_EQUALS" />
+  </Match>
+  <Match>
+    <!-- False positive on case objects -->
+    <Bug pattern="SE_NO_SERIALVERSIONID" />
+  </Match>
+  <Match>
+    <!-- False positive on case objects -->
+    <Bug pattern="ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD" />
+  </Match>
+  <Match>
+    <!-- False positive on immutable collections -->
+    <Bug pattern="EI_EXPOSE_REP" />
+  </Match>
+  <Match>
+    <!-- Complains on nested anonymous functions -->
+    <Bug pattern="SE_BAD_FIELD" />
+  </Match>
+  <Match>
+    <!-- Complains on case objects -->
+    <Bug pattern="SE_NO_SUITABLE_CONSTRUCTOR" />
+  </Match>
+
+  <!-- Specific filters for selected classes -->
+</FindBugsFilter>

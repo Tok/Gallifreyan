@@ -1,0 +1,667 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>gallifreyan</groupId>
+  <artifactId>Gallifreyan</artifactId>
+  <packaging>war</packaging>
+  <version>1.0-SNAPSHOT</version>
+  <name>Gallifreyan</name>
+  <url>https://gallifreyan-9000.rhcloud.com</url>
+
+  <issueManagement>
+    <system>Github</system>
+    <url>https://github.com/Tok/Gallifreyan-9000/issues</url>
+  </issueManagement>
+
+  <developers>
+    <developer>
+      <id>Tok</id>
+      <name>Lukas Steiger</name>
+      <email>lsteiger4@gmail.com</email>
+    </developer>
+  </developers>
+
+  <properties>
+    <sourceDirectory>${basedir}/src/main/scala</sourceDirectory>
+    <testSourceDirectory>${basedir}/src/test/scala</testSourceDirectory>
+    <openshiftNamespace>9000</openshiftNamespace>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- API Versions: -->
+    <!-- http://mvnrepository.com/ -->
+    <scalaVersion>2.10.1</scalaVersion>
+    <javaVersion>1.7</javaVersion>
+    <vaadinVersion>7.1.5</vaadinVersion>
+    <batikVersion>1.6-1</batikVersion>
+    <xercesVersion>2.4.0</xercesVersion>
+    <!-- Testing Versions: -->
+    <jUnitVersion>4.10</jUnitVersion>
+    <scctVersion>0.2-SNAPSHOT</scctVersion>
+    <jacocoVersion>0.6.4-SNAPSHOT</jacocoVersion>
+    <scalatestVerion>2.0.M6-SNAP9</scalatestVerion>
+    <easymockVersion>2.0</easymockVersion>
+    <htmlUnitVersion>2.12</htmlUnitVersion>
+    <mavenScalatestPluginVersion>1.0-M4-SNAPSHOT</mavenScalatestPluginVersion>
+    <!-- Building Plugin Versions: -->
+    <!-- http://maven.apache.org/plugins/index.html -->
+    <mavenCleanPluginVersion>2.5</mavenCleanPluginVersion>
+    <scalastyleMavenPluginVersion>0.3.3-SNAPSHOT</scalastyleMavenPluginVersion>
+    <MavenExecPluginVersion>1.2.1</MavenExecPluginVersion>
+    <mavenDependencyPluginVersion>2.8</mavenDependencyPluginVersion>
+    <scalaMavenPluginVersion>3.1.5</scalaMavenPluginVersion>
+    <mavenWarPluginVersion>2.3</mavenWarPluginVersion>
+    <mavenAntRunPluginVersion>1.7</mavenAntRunPluginVersion>
+    <mavenResourcesPluginVersion>2.6</mavenResourcesPluginVersion>
+    <mavenTruezipPluginVersion>1.1</mavenTruezipPluginVersion>
+    <tomcat7MavenPluginVersion>2.1</tomcat7MavenPluginVersion>
+    <!-- Reporting Plugin Versions: -->
+    <mavenFindbugsPluginVersion>2.5.3-SNAPSHOT</mavenFindbugsPluginVersion>
+    <mavenSurefirePluginVersion>2.15</mavenSurefirePluginVersion>
+    <mavenProjectInfoReportsPluginVersion>2.7</mavenProjectInfoReportsPluginVersion>
+    <mavenSitePluginVersion>3.3</mavenSitePluginVersion>
+    <!-- Coverage -->
+    <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
+    <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+    <sonar.jacoco.reportPath>${basedir}/target/jacoco.exec</sonar.jacoco.reportPath>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>vaadin-addons</id>
+      <url>http://maven.vaadin.com/vaadin-addons</url>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>sonatype-oss-public</id>
+      <url>https://oss.sonatype.org/content/groups/public/</url>
+    </pluginRepository>
+    <pluginRepository>
+      <id>codehaus-snapshots</id>
+      <url>https://nexus.codehaus.org/content/groups/snapshots-group</url>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-server</artifactId>
+      <version>${vaadinVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-themes</artifactId>
+      <version>${vaadinVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-client</artifactId>
+      <version>${vaadinVersion}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-client-compiler</artifactId>
+      <version>${vaadinVersion}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>batik</groupId>
+      <artifactId>batik-svggen</artifactId>
+      <version>${batikVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>batik</groupId>
+      <artifactId>batik-transcoder</artifactId>
+      <version>${batikVersion}</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>fop</artifactId>
+          <groupId>fop</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>xerces</groupId>
+      <artifactId>xercesImpl</artifactId>
+      <version>${xercesVersion}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-library</artifactId>
+      <version>${scalaVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.alchim31.maven</groupId>
+      <artifactId>scala-maven-plugin</artifactId>
+      <version>${scalaMavenPluginVersion}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.scalatest</groupId>
+      <artifactId>scalatest_2.10</artifactId>
+      <version>${scalatestVerion}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.easymock</groupId>
+      <artifactId>easymock</artifactId>
+      <version>${easymockVersion}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.htmlunit</groupId>
+      <artifactId>htmlunit</artifactId>
+      <version>${htmlUnitVersion}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${jUnitVersion}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <sourceDirectory>${sourceDirectory}</sourceDirectory>
+    <testSourceDirectory>${testSourceDirectory}</testSourceDirectory>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>${mavenCleanPluginVersion}</version>
+        <configuration>
+          <failOnError>false</failOnError>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.scalastyle</groupId>
+        <artifactId>scalastyle-maven-plugin</artifactId>
+        <version>${scalastyleMavenPluginVersion}</version>
+        <configuration>
+          <verbose>false</verbose>
+          <failOnViolation>true</failOnViolation>
+          <includeTestSourceDirectory>true</includeTestSourceDirectory>
+          <failOnWarning>false</failOnWarning>
+          <sourceDirectory>${sourceDirectory}</sourceDirectory>
+          <!-- <testSourceDirectory>${testSourceDirectory}</testSourceDirectory> -->
+          <configLocation>${basedir}/scalastyle_config.xml</configLocation>
+          <outputFile>${basedir}/target/scalastyle-output.xml</outputFile>
+          <outputEncoding>UTF-8</outputEncoding>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>test</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>net.alchim31.maven</groupId>
+        <artifactId>scala-maven-plugin</artifactId>
+        <version>${scalaMavenPluginVersion}</version>
+        <executions>
+          <execution>
+            <id>main-scalac</id>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>test-scalac</id>
+            <goals>
+              <goal>testCompile</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <includes>
+            <include>**/*.scala</include>
+          </includes>
+          <verbose>true</verbose>
+          <scalaVersion>${scalaVersion}</scalaVersion>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.scalatest</groupId>
+        <artifactId>scalatest-maven-plugin</artifactId>
+        <version>${mavenScalatestPluginVersion}</version>
+        <configuration>
+          <reportsDirectory>${basedir}/target/surefire-reports</reportsDirectory>
+          <junitxml>.</junitxml>
+          <filereports>TestSuite.txt</filereports>
+          <tagsToExclude>${testsTagsToExclude}</tagsToExclude>
+        </configuration>
+        <executions>
+          <execution>
+            <id>test</id>
+            <goals>
+              <goal>test</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>${MavenExecPluginVersion}</version>
+        <executions>
+          <execution>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>java</goal>
+            </goals>
+            <configuration>
+              <classpathScope>compile</classpathScope>
+              <mainClass>com.vaadin.sass.SassCompiler</mainClass>
+              <arguments>
+                <argument>src/main/resources/VAADIN/themes/gallifreyantheme/styles.scss</argument>
+                <argument>src/main/resources/VAADIN/themes/gallifreyantheme/styles.css</argument>
+              </arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.vaadin</groupId>
+        <artifactId>vaadin-maven-plugin</artifactId>
+        <version>${vaadinVersion}</version>
+        <configuration>
+          <webappDirectory>${basedir}/src/main/resources/VAADIN/widgetsets</webappDirectory>
+          <compileReport>true</compileReport>
+          <detail>true</detail>
+          <persistentunitcache>false</persistentunitcache>
+          <noServer>true</noServer>
+          <modules>
+            <module>gallifreyan.GallifreyanWidgetset</module>
+          </modules>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>vaadin:update-widgetset</phase>
+            <goals>
+              <!-- This will throw an error that can be ignored -->
+              <goal>update-widgetset</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${mavenSurefirePluginVersion}</version>
+        <configuration>
+          <skip>true</skip>
+          <goal>surefire-report:report</goal>
+          <reportFormat>html</reportFormat>
+          <aggregate>true</aggregate>
+          <skipTests>true</skipTests>
+          <includes>
+            <include>**/*Suite.class</include>
+          </includes>
+          <executions>
+            <execution>
+              <phase>integration-test</phase>
+              <goals>
+                <goal>test</goal>
+              </goals>
+              <configuration>
+                <skip>false</skip>
+              </configuration>
+            </execution>
+          </executions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>build</id>
+      <properties>
+        <testsTagsToExclude>SlowTest, DbTest</testsTagsToExclude>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version>${mavenAntRunPluginVersion}</version>
+            <executions>
+              <execution>
+                <id>copy root war</id>
+                <phase>install</phase>
+                <configuration>
+                  <target>
+                    <!-- copy war to deployments and rename it to ROOT.war -->
+                    <copy preservelastmodified="true"
+                      todir="${basedir}/deployments/openshift" verbose="true">
+                      <fileset dir="${basedir}/target"
+                        includes="${project.artifactId}-${project.version}.${project.packaging}" />
+                      <globmapper from="*.${project.packaging}"
+                        to="ROOT.${project.packaging}" />
+                    </copy>
+                    <!-- copy executable standalone to deployments -->
+                    <copy preservelastmodified="true"
+                      todir="${basedir}/deployments/standalone/gallifreyan"
+                      verbose="true">
+                      <fileset dir="${basedir}/target"
+                        includes="${project.artifactId}-${project.version}-war-exec.jar" />
+                    </copy>
+                    <!-- remove extract folder and log -->
+                    <delete failonerror="false" dir="${basedir}/.extract"
+                      verbose="false" />
+                    <delete failonerror="false"
+                      dir="${basedir}/deployments/standalone/gallifreyan/.extract"
+                      verbose="false" />
+                    <delete failonerror="false" verbose="false">
+                      <fileset
+                        dir="${basedir}/deployments/standalone/gallifreyan/">
+                        <exclude name=".gitignore" />
+                        <exclude name="README.txt" />
+                        <exclude name="LICENSE.txt" />
+                        <exclude
+                          name="${project.artifactId}-${project.version}-war-exec.jar" />
+                        <exclude name="run.sh" />
+                        <exclude name="run.bat" />
+                      </fileset>
+                    </delete>
+                  </target>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <artifactId>maven-war-plugin</artifactId>
+            <version>${mavenWarPluginVersion}</version>
+            <configuration>
+              <!-- FIXME scopes: Most of those jars shouldn't even be there in the first place -->
+              <packagingExcludes>WEB-INF/classes/VAADIN/widgetsets/WEB-INF/**,
+                WEB-INF/lib/aether-*.jar,
+                WEB-INF/lib/batik-gui-util*.jar,
+                WEB-INF/lib/classworlds-*.jar,
+                WEB-INF/lib/commons-*.jar,
+                WEB-INF/lib/compiler-*.jar,
+                WEB-INF/lib/cssparser-*.jar,
+                WEB-INF/lib/doxia-*.jar,
+                WEB-INF/lib/incremental-*.jar,
+                WEB-INF/lib/js-*.jar,
+                WEB-INF/lib/maven-*.jar,
+                WEB-INF/lib/plexus-*.jar,
+                WEB-INF/lib/sac-*.jar,
+                WEB-INF/lib/sbt-*.jar,
+                WEB-INF/lib/scala-maven-*.jar,
+                WEB-INF/lib/scala-compiler-*.jar,
+                WEB-INF/lib/vaadin-theme-compiler*.jar,
+                WEB-INF/lib/wagon-*.jar,
+                WEB-INF/lib/sisu-*.jar,
+                WEB-INF/lib/xml*.jar,
+                WEB-INF/lib/zinc-*.jar
+              </packagingExcludes>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.tomcat.maven</groupId>
+            <artifactId>tomcat7-maven-plugin</artifactId>
+            <version>${tomcat7MavenPluginVersion}</version>
+            <executions>
+              <execution>
+                <id>tomcat-run</id>
+                <goals>
+                  <goal>exec-war-only</goal>
+                </goals>
+                <phase>package</phase>
+                <configuration>
+                  <path>/</path>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>truezip-maven-plugin</artifactId>
+            <version>${mavenTruezipPluginVersion}</version>
+            <executions>
+              <execution>
+                <id>zip-standalone</id>
+                <phase>install</phase>
+                <goals>
+                  <goal>cp</goal>
+                  <goal>remove</goal>
+                </goals>
+                <configuration>
+                  <from>${basedir}/deployments/standalone/gallifreyan</from>
+                  <to>${basedir}/deployments/standalone/${project.artifactId}-${project.version}.zip</to>
+                  <fileset>
+                    <directory>${basedir}/deployments/standalone/${project.artifactId}-${project.version}.zip</directory>
+                    <includes>
+                      <include>**/.extract</include>
+                      <include>**/.gitignore</include>
+                      <include>**/log.txt</include>
+                    </includes>
+                  </fileset>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>test</id>
+      <properties>
+        <testsTagsToExclude></testsTagsToExclude>
+      </properties>
+    </profile>
+    <profile>
+      <id>document</id>
+      <properties>
+        <testsTagsToExclude></testsTagsToExclude>
+      </properties>
+      <repositories>
+        <repository>
+          <id>scct repository</id>
+          <url>http://mtkopone.github.com/scct/maven-repo</url>
+        </repository>
+      </repositories>
+      <dependencies>
+        <dependency>
+          <groupId>reaktor</groupId>
+          <artifactId>scct_2.10</artifactId>
+          <version>${scctVersion}</version>
+        </dependency>
+      </dependencies>
+      <reporting>
+        <plugins>
+          <plugin>
+            <groupId>net.alchim31.maven</groupId>
+            <artifactId>scala-maven-plugin</artifactId>
+            <version>${scalaMavenPluginVersion}</version>
+          </plugin>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>${jacocoVersion}</version>
+            <reportSets>
+              <reportSet>
+                <reports>
+                  <report>report</report>
+                </reports>
+              </reportSet>
+            </reportSets>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>findbugs-maven-plugin</artifactId>
+            <version>${mavenFindbugsPluginVersion}</version>
+            <configuration>
+              <failOnError>true</failOnError>
+              <effort>Max</effort> <!-- Min, Default and Max. -->
+              <threshold>Low</threshold> <!-- High, Default, Low, Ignore, Exp -->
+              <excludeFilterFile>findbugs-excludes.xml</excludeFilterFile>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-project-info-reports-plugin</artifactId>
+            <version>${mavenProjectInfoReportsPluginVersion}</version>
+            <reportSets>
+              <reportSet>
+                <reports>
+                  <report>index</report>
+                  <report>summary</report>
+                  <report>project-team</report>
+                  <report>license</report>
+                  <report>dependency-info</report>
+                  <!-- <report>dependencies</report> -->
+                  <report>plugins</report>
+                </reports>
+              </reportSet>
+            </reportSets>
+            <configuration>
+              <dependencyLocationEnabled>false</dependencyLocationEnabled>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-site-plugin</artifactId>
+            <version>${mavenSitePluginVersion}</version>
+          </plugin>
+        </plugins>
+      </reporting>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>${mavenSurefirePluginVersion}</version>
+            <configuration>
+              <systemPropertyVariables>
+                <scct.project.name>${project.name}</scct.project.name>
+                <scct.coverage.file>${project.build.outputDirectory}/coverage.data</scct.coverage.file>
+                <scct.report.dir>${project.build.directory}/coverage-report</scct.report.dir>
+                <scct.source.dir>${project.build.sourceDirectory}</scct.source.dir>
+              </systemPropertyVariables>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>net.alchim31.maven</groupId>
+            <artifactId>scala-maven-plugin</artifactId>
+            <version>${scalaMavenPluginVersion}</version>
+            <executions>
+              <execution>
+                <id>main-scalac</id>
+                <configuration>
+                  <compilerPlugins>
+                    <compilerPlugin>
+                      <groupId>reaktor</groupId>
+                      <artifactId>scct_2.10</artifactId>
+                      <version>${scctVersion}</version>
+                    </compilerPlugin>
+                  </compilerPlugins>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>${jacocoVersion}</version>
+            <executions>
+              <execution>
+                <id>prepare-agent</id>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>report</id>
+                <phase>prepare-package</phase>
+                <goals>
+                  <goal>report</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version>${mavenAntRunPluginVersion}</version>
+            <executions>
+              <execution>
+                <phase>post-site</phase>
+                <configuration>
+                  <target>
+                    <!-- Move Site -->
+                    <delete failonerror="false" dir="${basedir}/site"
+                      verbose="false" />
+                    <copy preservelastmodified="true" todir="${basedir}/site"
+                      verbose="false">
+                      <fileset dir="${basedir}/target/site" />
+                    </copy>
+                    <delete failonerror="false" verbose="false">
+                      <fileset dir="${basedir}/target/site" />
+                    </delete>
+                    <!-- Workaround: move the report generated by scct -->
+                    <move todir="${basedir}/site/scct" verbose="true">
+                      <fileset dir="${basedir}">
+                        <include name="cobertura.xml" />
+                        <include name="*.css" />
+                        <include name="*.data" />
+                        <include name="*.html" />
+                        <include name="*.js" />
+                        <include name="*.png" />
+                      </fileset>
+                    </move>
+                    <!-- Closing meta tag in scct report index -->
+                    <replace file="${basedir}/site/scct/index.html">
+                      <replacetoken><![CDATA[<meta content="text/html; charset=UTF-8" http-equiv="Content-Type">]]></replacetoken>
+                      <replacevalue><![CDATA[<meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />]]></replacevalue>
+                    </replace>
+                    <!-- Append scct report after JaCoCo -->
+                    <replace file="${basedir}/site/project-reports.html">
+                      <replacetoken><![CDATA[JaCoCo</a>
+            </li>]]></replacetoken>
+                      <replacevalue><![CDATA[JaCoCo</a>
+            </li><li class="none"><a href="scct/index.html" title="scct">SCCT</a></li>]]></replacevalue>
+                    </replace>
+                    <replace file="${basedir}/site/findbugs.html">
+                      <replacetoken><![CDATA[JaCoCo</a>
+            </li>]]></replacetoken>
+                      <replacevalue><![CDATA[JaCoCo</a>
+            </li><li class="none"><a href="scct/index.html" title="scct">SCCT</a></li>]]></replacevalue>
+                    </replace>
+                    <replace file="${basedir}/site/project-reports.html">
+                      <replacetoken><![CDATA[<td>JaCoCo Test Coverage Report.</td>]]></replacetoken>
+                      <replacevalue><![CDATA[<td>JaCoCo Test Coverage Report.</td>
+                        <tr class="b">
+                          <td><a href="scct/index.html">SCCT</a></td>
+                          <td>SCCT Coverage Report.</td>
+                        </tr>]]></replacevalue>
+                    </replace>
+                    <!-- Open report in default browser -->
+                    <exec executable="start" vmlauncher="false">
+                      <arg line="${basedir}/site/index.html" />
+                    </exec>
+                  </target>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>
