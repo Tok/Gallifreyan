@@ -1,6 +1,6 @@
 # Circular Gallifreyan Transliterator
 
-## WARNING: Work in progress. This application isn't finished and may therefore give false results.
+#### WARNING: Work in progress. This application isn't finished and may therefore give false results.
 
 <pre>
             _ _
@@ -21,7 +21,7 @@ This application is running on OpenShift at: http://gallifreyan-9000.rhcloud.com
 
 ---------------------------------------
 
-## Frameworks and Technologies
+#### Frameworks and Technologies
 
 * Scala
 * Vaadin 7 (user interface)
@@ -31,7 +31,7 @@ This application is running on OpenShift at: http://gallifreyan-9000.rhcloud.com
 
 ---------------------------------------
 
-## Important Classes
+#### Important Classes
 
 [Init-Class](/src/main/scala/gallifreyan/GallifreyanInit.scala)
 
