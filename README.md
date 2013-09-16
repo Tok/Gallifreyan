@@ -1,6 +1,7 @@
 # Circular Gallifreyan Transliterator
 
-#### WARNING: Work in progress. This application isn't finished and may therefore give false results.
+#### WARNING: Work in progress.
+#### This application isn't finished and may therefore give false results.
 
 <pre>
             _ _
@@ -33,13 +34,10 @@ This application is running on OpenShift at: http://gallifreyan-9000.rhcloud.com
 
 #### Important Classes
 
-[Init-Class](/src/main/scala/gallifreyan/GallifreyanInit.scala)
-
-[Drawing-Util](/src/main/scala/gallifreyan/util/DrawUtil.scala)
-
-[Text-Util](/src/main/scala/gallifreyan/util/TextUtil.scala)
-
-[Calculation-Util](/src/main/scala/gallifreyan/util/CalcUtil.scala)
+* [Init-Class](/src/main/scala/gallifreyan/GallifreyanInit.scala)
+* [Drawing-Util](/src/main/scala/gallifreyan/util/DrawUtil.scala)
+* [Text-Util](/src/main/scala/gallifreyan/util/TextUtil.scala)
+* [Calculation-Util](/src/main/scala/gallifreyan/util/CalcUtil.scala)
 
 ---------------------------------------
 
