@@ -22,6 +22,36 @@ This application is running on OpenShift at: http://gallifreyan-9000.rhcloud.com
 
 ---------------------------------------
 
+#### TODO
+
+##### High Priority
+
+* Fix vowel and consonant positions
+* Force vowel separation on different double vowels
+* Connect words to sentences
+* Implement punctation
+* Calculate and draw line connections
+* Input validation
+* Show an error and refuse translation when a word with too many syllables is entered.
+* Show an error and refuse translation when a sentence with too many words is entered.
+
+##### Medium Priority
+
+* Show a warning when the letter C is replaced
+* Improve SVG output for manual manipulation
+* Allow manual line connections
+* Consider to draw syllables near the center for words with more than six syllables
+* Allow manual separation of vowels from syllables
+
+##### Low Priority
+
+* Allow different output sizes
+* Add option for quadruple dot C
+* Optimize for mobile devices
+* Fix SVG download problems for IE if possible
+
+---------------------------------------
+
 #### Frameworks and Technologies
 
 * Scala
