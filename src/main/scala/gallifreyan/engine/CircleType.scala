@@ -9,4 +9,5 @@ object CircleType {
   case object STRIKED extends CircleType(0.5D, 0.55D, 1D, false)
   val values: List[CircleType] = List(OPEN, FULL, HALF, STRIKED)
   def valueOf(name: String): Option[CircleType] = values.find(_.toString.equalsIgnoreCase(name))
+  val openHalfRatio: Double = OPEN.ratio / HALF.ratio
 }

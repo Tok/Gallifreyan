@@ -1,11 +1,9 @@
 package gallifreyan.engine.cases
 
 case class Coord(val x: Int, val y: Int) {
-  def compare(that: Coord): Int = {
-    x.compare(that.x) match {
-      case 0 => y.compare(that.y)
-      case res => res
-    }
+  def compare(that: Coord): Int = x.compare(that.x) match {
+    case 0 => y.compare(that.y)
+    case res: Any => res
   }
   def addToX(v: Int): Coord = Coord(x + v, y)
   def addToY(v: Int): Coord = Coord(x, y + v)

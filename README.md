@@ -26,7 +26,6 @@ This application is running on OpenShift at: http://gallifreyan-9000.rhcloud.com
 
 ##### High Priority
 
-* Fix vowel and consonant positions
 * Force vowel separation on different double vowels
 * Connect words to sentences
 * Implement punctation

@@ -61,8 +61,12 @@ object DrawUtil {
   }
 
   private def drawSyllable(g2d: Graphics2D, syl: Syllable, rot: Double, sizeRatio: Double): Set[Line] = {
-    def isDouble(i: Int, syl: Syllable): Boolean = i > 0 && syl(i) == syl(i - 1)
-    val connectors = syl.indices.map(i => drawCharacter(g2d, syl(i), getSyllableCircle(syl, sizeRatio), isDouble(i, syl), sizeRatio, rot))
+    def isDouble(i: Int, syl: Syllable): Boolean = i > 0 && syl(i) == syl(i - 1) //TODO don't access list by index
+    val lastCon = syl.head match {
+      case con: Consonant => Some(con)
+      case _ => None
+    }
+    val connectors = syl.indices.map(i => drawCharacter(g2d, syl(i), getSyllableCircle(syl, sizeRatio), lastCon, isDouble(i, syl), sizeRatio, rot))
     connectors.flatten.toSet
   }
 
@@ -85,7 +89,7 @@ object DrawUtil {
     val rat = if (isDouble) { con.circleType.doubleRatio } else { con.circleType.ratio }
     val radius = (wordCircle.radius * rat).intValue
     val fixedRadius = (radius * sizeRatio).intValue
-    val fixedCenter = if(con.circleType.equals(CircleType.STRIKED)) {
+    val fixedCenter = if (con.circleType.equals(CircleType.STRIKED)) {
       wordCircle.center.addToY(wordCircle.radius)
     } else {
       wordCircle.center.addToY(offset).addToY(radius - (fixedRadius))
@@ -93,10 +97,11 @@ object DrawUtil {
     Circle(fixedCenter, fixedRadius)
   }
 
-  private def drawCharacter(g2d: Graphics2D, c: Character, sylCircle: Circle, isDouble: Boolean, sizeRatio: Double, rot: Double): Set[Line] = {
+  private def drawCharacter(g2d: Graphics2D, c: Character, sylCircle: Circle, lastCon: Option[Consonant],
+      isDouble: Boolean, sizeRatio: Double, rot: Double): Set[Line] = {
     c match {
       case con: Consonant => drawConsonant(g2d, con, isDouble, sizeRatio, -rot)
-      case vow: Vowel => drawVowel(g2d, vow, sylCircle, isDouble, -rot)
+      case vow: Vowel => drawVowel(g2d, vow, sylCircle, lastCon, isDouble, -rot)
       case pun: Punctation => drawPunctation(g2d, pun, -rot)
     }
   }
@@ -148,20 +153,32 @@ object DrawUtil {
     }
   }
 
-  private def drawVowel(g2d: Graphics2D, vow: Vowel, sylCircle: Circle, isDouble: Boolean, rot: Double): Set[Line] = {
-    val offset = (sylCircle.radius * vow.position.offset).intValue
+  private def drawVowel(g2d: Graphics2D, vow: Vowel, sylCircle: Circle, lastCon: Option[Consonant], isDouble: Boolean, rot: Double): Set[Line] = {
+    def offset: Int = (sylCircle.radius * vow.position.offset).intValue
+    def halfOff: Int = offset / 2
     val original = if (vow.position.equals(VowelPosition.OUT)) {
-      wc.center.addToY(wc.radius + (offset / 2))
+      wc.center.addToY(wc.radius + halfOff)
+    } else if (vow.position.equals(VowelPosition.IN)) {
+      lastCon match {
+        case Some(c) => sylCircle.center.addToY(offset)
+        case _ => wc.center.addToY(wc.radius + halfOff)
+      }
     } else {
-      sylCircle.center.addToY(offset)
+      lastCon match {
+        case Some(c) if c.circleType.equals(CircleType.HALF) => wc.center.addToY(wc.radius)
+        case _ => sylCircle.center.addToY(offset)
+      }
     }
     val center = rotate(original, rot)
     val rat = if (isDouble) { vow.position.doubleRatio } else { vow.position.ratio }
-    val radius = (sylCircle.radius * rat).intValue
+    val radius = lastCon match {
+      case Some(c) if c.circleType.equals(CircleType.HALF) => (sylCircle.radius * rat * CircleType.openHalfRatio).intValue
+      case _ => (sylCircle.radius * rat).intValue
+    }
     val circle = Circle(center, radius)
     drawCircle(g2d, circle, false)
     if (isDouble) { Set.empty } else {
-      def lineLength: Int = sylCircle.radius / 2
+      def lineLength: Int = sylCircle.radius / 3
       if (vow.position.equals(VowelPosition.CENTER_IN)) {
         val from = rotate(original.addToY(-radius), rot)
         val to = rotate(original.addToY(-radius - lineLength), rot)
