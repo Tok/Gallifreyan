@@ -43,8 +43,8 @@ class GallifreyanInit extends UI {
   val input = new TextField
   val button = new Button("Transliterate")
   val formatOption = new OptionGroup
-  val fgPicker = new ColorPicker("Color", Color.CYAN)
-  val bgPicker = new ColorPicker("Background", Color.BLUE)
+  val fgPicker = new ColorPicker("Color", Color.WHITE)
+  val bgPicker = new ColorPicker("Background", new Color(0, 59, 111)) //BBC-approved Tardis Blue (Pantone 2955C)
   val addText = new CheckBox("Add Text")
   val image = new Image
   val inputLayout = new HorizontalLayout
