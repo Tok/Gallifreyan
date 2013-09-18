@@ -32,7 +32,11 @@ import com.vaadin.ui.components.colorpicker.ColorChangeEvent
 import com.vaadin.ui.Label
 import com.vaadin.ui.Link
 import com.vaadin.server.ExternalResource
+import com.vaadin.annotations.Title
+import com.vaadin.annotations.PreserveOnRefresh
 
+@PreserveOnRefresh
+@Title("Circular Gallifreyan Transliterator")
 @Theme("gallifreyantheme")
 class GallifreyanInit extends UI {
   val df = new SimpleDateFormat("yyyyMMddHHmmssSSS")
