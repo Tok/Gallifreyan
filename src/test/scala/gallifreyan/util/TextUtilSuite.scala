@@ -1,11 +1,11 @@
 package gallifreyan.util
 
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import gallifreyan.AbstractTester
-import gallifreyan.engine.characters.Vowel
 import gallifreyan.engine.characters.Consonant
 import gallifreyan.engine.characters.Punctation
+import gallifreyan.engine.characters.Vowel
+import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class TextUtilSuite extends AbstractTester {
@@ -167,7 +167,7 @@ class TextUtilSuite extends AbstractTester {
 
   test("Syllable Lists") {
     assert(TextUtil.getSyllables("BOW").map(_.mkString).mkString("_") === "BO_W")
-    assert(TextUtil.getSyllables("TIES").map(_.mkString).mkString("_") === "TIE_S")
+    assert(TextUtil.getSyllables("TIES").map(_.mkString).mkString("_") === "TI_E_S")
     assert(TextUtil.getSyllables("ARE").map(_.mkString).mkString("_") === "A_RE")
     assert(TextUtil.getSyllables("COOL").map(_.mkString).mkString("_") === "KOO_L")
   }
@@ -200,5 +200,9 @@ class TextUtilSuite extends AbstractTester {
     assert(TextUtil.getSyllables("LII").map(_.mkString).mkString("_") === "LII")
     assert(TextUtil.getSyllables("MOO").map(_.mkString).mkString("_") === "MOO")
     assert(TextUtil.getSyllables("AA").map(_.mkString).mkString("_") === "AA")
+  }
+
+  test("Different Double Vowel Separation") {
+    assert(TextUtil.getSyllables("TIE").map(_.mkString).mkString("_") === "TI_E")
   }
 }
