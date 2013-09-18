@@ -71,7 +71,12 @@ class GallifreyanInit extends UI {
     formatOption.select(ImageFormat.PNG)
     formatOption.setNullSelectionAllowed(false)
     formatOption.setImmediate(true)
-    formatOption.addValueChangeListener(getValueChangeListener)
+    formatOption.addValueChangeListener(new ValueChangeListener {
+      override def valueChange(event: ValueChangeEvent): Unit = {
+        if (formatOption.isSelected(ImageFormat.SVG)) { footer.addValid } else { footer.removeValid  }
+        drawWords
+      }
+    })
 
     inputLayout.addComponent(formatOption)
     fgPicker.setImmediate(true)

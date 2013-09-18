@@ -19,12 +19,12 @@ import gallifreyan.engine.Sentence
 import gallifreyan.engine.Size
 import org.apache.batik.svggen.SVGGeneratorContext
 import java.awt.Font
+import org.apache.batik.dom.svg.SVGDOMImplementation
 
 object ImageUtil {
   def makeSvg(sentence: Sentence, fg: Color, bg: Color, addText: Boolean): Array[Byte] = {
     val domImpl = GenericDOMImplementation.getDOMImplementation
-    val svgNS = "http://www.w3.org/2000/svg"
-    val document = domImpl.createDocument(svgNS, "svg", None.orNull)
+    val document = domImpl.createDocument(SVGDOMImplementation.SVG_NAMESPACE_URI, "svg", None.orNull)
     val context = SVGGeneratorContext.createDefault(document)
     context.setComment(" Generated with Apache Batik by Toks Circular Gallifreyan Transliterator. ")
     val g2d = new SVGGraphics2D(context, false)
