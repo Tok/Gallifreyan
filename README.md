@@ -36,7 +36,6 @@ This application is running on OpenShift at: http://gallifreyan-9000.rhcloud.com
 
 ##### Medium Priority
 
-* Show a warning when the letter C is replaced
 * Allow manual line connections
 * Consider to draw syllables near the center for words with more than six syllables
 * Allow manual separation of vowels from syllables

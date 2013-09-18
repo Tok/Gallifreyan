@@ -2,7 +2,11 @@ package gallifreyan
 
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
+
+import com.vaadin.annotations.PreserveOnRefresh
 import com.vaadin.annotations.Theme
+import com.vaadin.annotations.Title
 import com.vaadin.data.Property.ValueChangeEvent
 import com.vaadin.data.Property.ValueChangeListener
 import com.vaadin.event.EventRouter
@@ -12,28 +16,22 @@ import com.vaadin.server.VaadinRequest
 import com.vaadin.shared.ui.colorpicker.Color
 import com.vaadin.ui.Alignment
 import com.vaadin.ui.Button
-import com.vaadin.ui.Button.ClickEvent
-import com.vaadin.ui.Button.ClickListener
 import com.vaadin.ui.CheckBox
 import com.vaadin.ui.ColorPicker
 import com.vaadin.ui.HorizontalLayout
 import com.vaadin.ui.Image
+import com.vaadin.ui.Notification
 import com.vaadin.ui.OptionGroup
 import com.vaadin.ui.TextField
 import com.vaadin.ui.UI
 import com.vaadin.ui.VerticalLayout
+import com.vaadin.ui.components.colorpicker.ColorChangeEvent
+import com.vaadin.ui.components.colorpicker.ColorChangeListener
+
 import gallifreyan.engine.ImageFormat
 import gallifreyan.engine.Size
 import gallifreyan.util.ImageUtil
 import gallifreyan.util.TextUtil
-import com.vaadin.ui.components.colorpicker.ColorChangeListener
-import com.vaadin.ui.components.colorpicker.ColorChangeListener
-import com.vaadin.ui.components.colorpicker.ColorChangeEvent
-import com.vaadin.ui.Label
-import com.vaadin.ui.Link
-import com.vaadin.server.ExternalResource
-import com.vaadin.annotations.Title
-import com.vaadin.annotations.PreserveOnRefresh
 
 @PreserveOnRefresh
 @Title("Circular Gallifreyan Transliterator")
@@ -114,6 +112,7 @@ class GallifreyanInit extends UI {
   }
 
   private def drawWords(): Unit = {
+    val in = input.getValue
     val sentence = TextUtil.getSyllables(input.getValue)
     val sentenceString = sentence.map(_.mkString).mkString
     Page.getCurrent.setUriFragment(sentenceString)
@@ -129,7 +128,14 @@ class GallifreyanInit extends UI {
       new StreamResource(pngStreamSource, imageName + ImageFormat.PNG.extension)
     }
     image.setSource(resource)
+    if (in.toUpperCase(Locale.getDefault).contains("C")) { showWarning("C has been replaced with K.") }
     image.markAsDirty
+  }
+
+  private def showWarning(message: String): Unit = {
+    val notification = new Notification(message, Notification.Type.HUMANIZED_MESSAGE)
+    notification.setDelayMsec(500)
+    notification.show(Page.getCurrent)
   }
 
   private def getValueChangeListener(): ValueChangeListener = {
