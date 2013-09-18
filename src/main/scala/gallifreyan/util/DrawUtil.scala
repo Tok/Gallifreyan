@@ -82,11 +82,14 @@ object DrawUtil {
 
   private def getConsonantCircle(con: Consonant, wordCircle: Circle, isDouble: Boolean, sizeRatio: Double): Circle = {
     val offset = (wordCircle.radius * con.circleType.offset).intValue
-    val center = wordCircle.center.addToY(offset)
     val rat = if (isDouble) { con.circleType.doubleRatio } else { con.circleType.ratio }
     val radius = (wordCircle.radius * rat).intValue
     val fixedRadius = (radius * sizeRatio).intValue
-    val fixedCenter = Coord(center.x, center.y + radius - (fixedRadius))
+    val fixedCenter = if(con.circleType.equals(CircleType.STRIKED)) {
+      wordCircle.center.addToY(wordCircle.radius)
+    } else {
+      wordCircle.center.addToY(offset).addToY(radius - (fixedRadius))
+    }
     Circle(fixedCenter, fixedRadius)
   }
 
