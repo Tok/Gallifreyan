@@ -150,7 +150,11 @@ object DrawUtil {
 
   private def drawVowel(g2d: Graphics2D, vow: Vowel, sylCircle: Circle, isDouble: Boolean, rot: Double): Set[Line] = {
     val offset = (sylCircle.radius * vow.position.offset).intValue
-    val original = sylCircle.center.addToY(offset)
+    val original = if (vow.position.equals(VowelPosition.OUT)) {
+      wc.center.addToY(wc.radius + (offset / 2))
+    } else {
+      sylCircle.center.addToY(offset)
+    }
     val center = rotate(original, rot)
     val rat = if (isDouble) { vow.position.doubleRatio } else { vow.position.ratio }
     val radius = (sylCircle.radius * rat).intValue
