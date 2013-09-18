@@ -23,6 +23,7 @@ import java.awt.geom.Point2D
 import gallifreyan.engine.cases.Connector
 import gallifreyan.engine.cases.Connection
 import gallifreyan.engine.cases.Line
+import java.awt.geom.Line2D
 
 object DrawUtil {
   val conceptMode = true
@@ -98,7 +99,7 @@ object DrawUtil {
   }
 
   private def drawCharacter(g2d: Graphics2D, c: Character, sylCircle: Circle, lastCon: Option[Consonant],
-      isDouble: Boolean, sizeRatio: Double, rot: Double): Set[Line] = {
+    isDouble: Boolean, sizeRatio: Double, rot: Double): Set[Line] = {
     c match {
       case con: Consonant => drawConsonant(g2d, con, isDouble, sizeRatio, -rot)
       case vow: Vowel => drawVowel(g2d, vow, sylCircle, lastCon, isDouble, -rot)
@@ -249,7 +250,11 @@ object DrawUtil {
     }
   }
 
-  private def drawLine(g2d: Graphics2D, s: Coord, e: Coord): Unit = g2d.drawLine(s.x, s.y, e.x, e.y)
+  private def drawLine(g2d: Graphics2D, s: Coord, e: Coord): Unit = {
+    //This method is using polyline instead of line to allow better manipulation of the resulting SVG
+    //g2d.drawLine(s.x, s.y, e.x, e.y)
+    g2d.drawPolyline(List(s.x, e.x).toArray, List(s.y, e.y).toArray.toArray, 2)
+  }
 
   private def drawPoint(g2d: Graphics2D, pos: Coord, color: Color): Unit = {
     val oldColor = g2d.getPaint

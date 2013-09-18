@@ -29,6 +29,7 @@ object ImageUtil {
     context.setComment(" Generated with Apache Batik by Toks Circular Gallifreyan Transliterator. ")
     val g2d = new SVGGraphics2D(context, false)
     g2d.setSVGCanvasSize(new Dimension(Size.width, Size.height))
+    g2d.setClip(0, 0, Size.width, Size.height)
     g2d.setPaint(fg)
     g2d.setColor(fg)
     g2d.setBackground(bg)
