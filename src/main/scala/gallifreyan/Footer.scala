@@ -37,15 +37,15 @@ class Footer extends VerticalLayout {
   addToLayout(textLayout, tokLink)
 
   horLayout.addComponent(textLayout)
-  horLayout.setComponentAlignment(textLayout, Alignment.TOP_LEFT)
+  horLayout.setComponentAlignment(textLayout, Alignment.BOTTOM_LEFT)
   horLayout.addComponent(valid)
-  horLayout.setComponentAlignment(valid, Alignment.TOP_RIGHT)
+  horLayout.setComponentAlignment(valid, Alignment.BOTTOM_RIGHT)
 
   addComponent(horLayout)
 
   private def addToLayout(layout: HorizontalLayout, component: Component): Unit = {
     layout.addComponent(component)
-    layout.setComponentAlignment(component, Alignment.TOP_LEFT)
+    layout.setComponentAlignment(component, Alignment.BOTTOM_LEFT)
   }
 
   def removeValid: Unit = valid.removeAllComponents
