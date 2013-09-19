@@ -19,7 +19,7 @@ object TextUtil {
       in.toUpperCase(Locale.getDefault) match {
         case "C" => Consonant.K
         case "Q" => Consonant.QU
-        case _ => Punctation.SPACE
+        case _ => throw new IllegalArgumentException("Untransliteratable character: " + in)
       }
     }
     def pun: Character = Punctation.valueOf(in).getOrElse(other)
