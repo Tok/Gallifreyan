@@ -26,7 +26,8 @@ This application is running on OpenShift at: http://gallifreyan-9000.rhcloud.com
 
 ##### High Priority
 
-* Calculate and draw line connections
+* Calculate and draw direct line connections
+* Improve code quality and reduce redundancies
 
 ##### Medium Priority
 

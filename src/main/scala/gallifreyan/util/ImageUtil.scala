@@ -22,7 +22,7 @@ import gallifreyan.Size
 import gallifreyan.engine.data.Sentence
 
 object ImageUtil {
-  def makeSvg(sentence: Sentence, fg: Color, bg: Color, addText: Boolean): Array[Byte] = {
+  def makeSvg(sentence: Sentence, fg: Color, bg: Color, addText: Boolean, stubs: Boolean): Array[Byte] = {
     val domImpl = GenericDOMImplementation.getDOMImplementation
     val document = domImpl.createDocument(SVGDOMImplementation.SVG_NAMESPACE_URI, "svg", None.orNull)
     val context = SVGGeneratorContext.createDefault(document)
@@ -35,7 +35,7 @@ object ImageUtil {
     g2d.setBackground(bg)
     g2d.setStroke(DrawUtil.STROKE)
     g2d.setFont(DrawUtil.FONT)
-    val gen = new Generate(sentence, fg, bg, addText)
+    val gen = new Generate(sentence, fg, bg, addText, stubs)
     gen.paint(g2d)
     val buffer = new ByteArrayOutputStream
     val out = new OutputStreamWriter(buffer, "UTF-8")
@@ -43,8 +43,8 @@ object ImageUtil {
     buffer.toByteArray
   }
 
-  class Generate(val sentence: Sentence, val fg: Color, val bg: Color, val addText: Boolean) {
-    def paint(g2d: Graphics2D): Unit = DrawUtil.drawSentence(g2d, sentence, fg, bg, addText)
+  class Generate(val sentence: Sentence, val fg: Color, val bg: Color, val addText: Boolean, val stubs: Boolean) {
+    def paint(g2d: Graphics2D): Unit = DrawUtil.drawSentence(g2d, sentence, fg, bg, addText, stubs)
   }
 
   def makePngFromSvg(svgBytes: Array[Byte]): StreamSource = {

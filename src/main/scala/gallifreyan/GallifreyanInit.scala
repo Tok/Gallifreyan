@@ -43,6 +43,7 @@ class GallifreyanInit extends UI {
   val fgPicker = new ColorPicker("Color", Color.WHITE)
   val bgPicker = new ColorPicker("Background", new Color(0, 59, 111)) //BBC-approved Tardis Blue (Pantone 2955C)
   val addText = new CheckBox("Add Text")
+  val stubs = new CheckBox("Stubs")
   val image = new Image
   val inputLayout = new HorizontalLayout
   val layout = new VerticalLayout
@@ -59,15 +60,16 @@ class GallifreyanInit extends UI {
 
     inputLayout.setSpacing(true)
     input.setValue(frag)
-    input.setWidth(685 + PX)
+    input.setWidth(620 + PX)
     input.focus
     input.setImmediate(true)
     input.addValueChangeListener(makeValueChangeListener)
     inputLayout.addComponent(input)
     button.setWidth(150 + PX)
+    button.setDescription("Generate Image")
     inputLayout.addComponent(button)
     ImageFormat.values.foreach(formatOption.addItem(_))
-    formatOption.select(ImageFormat.PNG)
+    formatOption.select(ImageFormat.SVG)
     formatOption.setNullSelectionAllowed(false)
     formatOption.setImmediate(true)
     formatOption.addValueChangeListener(new ValueChangeListener {
@@ -79,16 +81,25 @@ class GallifreyanInit extends UI {
 
     inputLayout.addComponent(formatOption)
     fgPicker.setImmediate(true)
+    fgPicker.setDescription("Line Color")
     fgPicker.addColorChangeListener(makeColorChangeListener)
     inputLayout.addComponent(fgPicker)
     bgPicker.setImmediate(true)
+    bgPicker.setDescription("Background Color")
     bgPicker.addColorChangeListener(makeColorChangeListener)
     inputLayout.addComponent(bgPicker)
-    addText.setWidth(100 + PX)
+    addText.setWidth(80 + PX)
     addText.setValue(false)
     addText.setImmediate(true)
+    addText.setDescription("Add resulting text to image.")
     addText.addValueChangeListener(makeValueChangeListener)
     inputLayout.addComponent(addText)
+    stubs.setWidth(80 + PX)
+    stubs.setValue(false)
+    stubs.setImmediate(true)
+    stubs.setDescription("Leave all lines as stubs for easy manupulation of the resulting image.")
+    stubs.addValueChangeListener(makeValueChangeListener)
+    inputLayout.addComponent(stubs)
 
     layout.addComponent(inputLayout)
     layout.setComponentAlignment(inputLayout, Alignment.TOP_CENTER)
@@ -117,7 +128,7 @@ class GallifreyanInit extends UI {
       Page.getCurrent.setUriFragment(sentenceString)
       val fg = ImageUtil.makeAwtFromVaadinColor(fgPicker.getColor)
       val bg = ImageUtil.makeAwtFromVaadinColor(bgPicker.getColor)
-      val svgBytes: Array[Byte] = ImageUtil.makeSvg(sentence, fg, bg, addText.getValue)
+      val svgBytes: Array[Byte] = ImageUtil.makeSvg(sentence, fg, bg, addText.getValue, stubs.getValue)
       val imageName = sentenceString + "-" + df.format(new Date())
       if (in.toUpperCase(Locale.getDefault).contains("C")) {
         notify("C has been replaced with K.", Notification.Type.HUMANIZED_MESSAGE)

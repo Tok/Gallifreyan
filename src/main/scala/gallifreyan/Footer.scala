@@ -41,6 +41,7 @@ class Footer extends VerticalLayout {
   horLayout.setComponentAlignment(valid, Alignment.BOTTOM_RIGHT)
 
   addComponent(horLayout)
+  addValid
 
   private def addToLayout(layout: HorizontalLayout, component: Component): Unit = {
     layout.addComponent(component)
