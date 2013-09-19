@@ -95,7 +95,7 @@ class GallifreyanInit extends UI {
     addText.addValueChangeListener(makeValueChangeListener)
     inputLayout.addComponent(addText)
     stubs.setWidth(80 + PX)
-    stubs.setValue(false)
+    stubs.setValue(true)
     stubs.setImmediate(true)
     stubs.setDescription("Leave all lines as stubs for easy manupulation of the resulting image.")
     stubs.addValueChangeListener(makeValueChangeListener)

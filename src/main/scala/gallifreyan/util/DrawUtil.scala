@@ -332,8 +332,10 @@ object DrawUtil {
     val circle = Circle(center, radius)
     drawCircle(g2d, circle)
     def getResult(from: Coord, to: Coord): Set[Line] = {
-      if (stubs) { Set(Line(from, to)) }
-      else {
+      if (stubs) {
+        drawLine(g2d, from, to)
+        Set(Line(from, to))
+      } else {
         val realTo = sylCircle.calcClosestTo(to)
         drawLine(g2d, from, realTo)
         Set(Line(from, realTo))
