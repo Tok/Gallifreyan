@@ -17,9 +17,8 @@ object Punctation {
   case object COMMA extends Punctation(",")
   case object SEMICOLON extends Punctation(";")
   case object COLON extends Punctation(":")
-  case object SPACE extends Punctation(" ")
   val values: List[Punctation] = List(DOT, QUESTION, EXCLAIM,
-    DOUBLEQUOTE, QUOTE, HYPHEN, COMMA, SEMICOLON, COLON, SPACE)
+    DOUBLEQUOTE, QUOTE, HYPHEN, COMMA, SEMICOLON, COLON)
   val charValues: List[Character] = values.map(_.asInstanceOf[Character])
   def valueOf(v: String): Option[Punctation] = values.find(_.value.equalsIgnoreCase(v))
 }

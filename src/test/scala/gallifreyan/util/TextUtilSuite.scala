@@ -107,7 +107,6 @@ class TextUtilSuite extends AbstractTester {
     assert(TextUtil.makeChar(",") === Punctation.COMMA)
     assert(TextUtil.makeChar(";") === Punctation.SEMICOLON)
     assert(TextUtil.makeChar(":") === Punctation.COLON)
-    assert(TextUtil.makeChar(" ") === Punctation.SPACE)
   }
 
   test("Illegal Characters") {
@@ -251,12 +250,27 @@ class TextUtilSuite extends AbstractTester {
     assert(trippleOs.toString === "O_SS_S")
   }
 
-  test("Multi Punctation Split") {
-    val doubleDot = TextUtil.makeWord("..")
-    assert(doubleDot.toString === "._.")
-    val trippleDot = TextUtil.makeWord("...")
-    assert(trippleDot.toString === "._._.")
-    val dotComma = TextUtil.makeWord(".,")
-    assert(dotComma.toString === "._,")
+  test("Punctation Handling") {
+    assert(TextUtil.makeWord("B!").toString === "B!")
+    assert(TextUtil.makeWord("Bbaa!").toString === "BBAA!")
+    assert(TextUtil.makeWord("Bbaa.").toString === "BBAA.")
+    assert(TextUtil.makeWord("Bbaa,").toString === "BBAA,")    
+  }
+
+  test("Multi Punctation Handling") {
+    assert(intercept[IllegalArgumentException] { TextUtil.makeWord("..") }.isInstanceOf[IllegalArgumentException])
+    assert(intercept[IllegalArgumentException] { TextUtil.makeWord("A..") }.isInstanceOf[IllegalArgumentException])
+    assert(intercept[IllegalArgumentException] { TextUtil.makeWord("B..") }.isInstanceOf[IllegalArgumentException])
+    assert(intercept[IllegalArgumentException] { TextUtil.makeWord("...") }.isInstanceOf[IllegalArgumentException])
+    assert(intercept[IllegalArgumentException] { TextUtil.makeWord(".,") }.isInstanceOf[IllegalArgumentException])
+  }
+
+  test("Initial Punctation Handling") {
+    assert(intercept[IllegalArgumentException] { TextUtil.makeWord(".") }.isInstanceOf[IllegalArgumentException])
+    assert(intercept[IllegalArgumentException] { TextUtil.makeWord(",") }.isInstanceOf[IllegalArgumentException])
+    assert(intercept[IllegalArgumentException] { TextUtil.makeWord("!") }.isInstanceOf[IllegalArgumentException])
+    assert(intercept[IllegalArgumentException] { TextUtil.makeWord("!!") }.isInstanceOf[IllegalArgumentException])
+    assert(intercept[IllegalArgumentException] { TextUtil.makeWord("!A") }.isInstanceOf[IllegalArgumentException])
+    assert(intercept[IllegalArgumentException] { TextUtil.makeWord("!B") }.isInstanceOf[IllegalArgumentException])
   }
 }

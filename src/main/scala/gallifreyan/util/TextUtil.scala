@@ -48,8 +48,10 @@ object TextUtil {
         if (newChar.isDouble) { skip } else { chars.tail }
       }
       if (chars.isEmpty) { accu }
-      else if (accu.isEmpty) { makeWord(addAsNew, getNext) }
-      else {
+      else if (accu.isEmpty) {
+        if (newChar.isInstanceOf[Punctation]) { throw new IllegalArgumentException("Initial punctation is not allowed.") }
+        else { makeWord(addAsNew, getNext) }
+      } else {
         newChar match {
           case c: Consonant =>
             if (!isLastEqual || isBeforeLastAndLastEqual) { makeWord(addAsNew, getNext) }
@@ -58,7 +60,7 @@ object TextUtil {
             if ((!isLastEqual && isLastVowel) || isBeforeLastAndLastEqual) { makeWord(addAsNew, chars.tail) }
             else { makeWord(addToLast, chars.tail) }
           case _ => {
-            if (isLastPunctation) { makeWord(addAsNew, getNext) }
+            if (isLastPunctation) { throw new IllegalArgumentException("Multi punctation is not allowed.") }
             else { makeWord(addToLast, chars.tail) }
           }
         }

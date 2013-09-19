@@ -105,8 +105,9 @@ object DrawUtil {
   private def writeText(g2d: Graphics2D, sentence: Sentence): Unit = g2d.drawString(sentence.mkString, 10, FONT.getSize)
 
   private def drawSentence(g2d: Graphics2D, sentence: Sentence): Unit = {
+    val outerCircle = Sentence.circle.addToRadius(LINE_WIDTH * 7)
     val divCircle = Sentence.circle.addToRadius((Sentence.circle.radius * 0.5D).intValue)
-    def drawDivot(angle: Double): Unit = {
+    def drawDivot(angle: Double, op: Option[Punctation]): Unit = {
       val center = Coord(divCircle.center.x, divCircle.center.y + divCircle.radius)
       val radius = Sentence.circle.radius * CalcUtil.calcSizeRatio(sentence.v.size + 1)
       val circle = Circle(center, radius.intValue)
@@ -116,16 +117,62 @@ object DrawUtil {
       val rotatedCircle = Circle(rotate(center, angle, Sentence.circle.center), radius.intValue)
       fillRect(g2d, rotatedCircle.center, rotE, rotS)
       drawArc(g2d, rotatedCircle, rotE, rotS)
+      op.foreach(pun => drawPunctation(g2d, pun, rotatedCircle, outerCircle))
     }
-    def drawDivots(): Unit = {
+    def drawDivots: Unit = {
+      def getPunOption(c: Character): Option[Punctation] = {
+        if (c.isInstanceOf[Punctation]) { Some(c.asInstanceOf[Punctation]) } else { None }
+      }
+      val pun = sentence.v.map(_.v.last).map(syl => getPunOption(syl.v.last))
       val angle = sentence.rots(1) / 2
-      val angles = sentence.rots.map(_ + angle)
-      angles.foreach(drawDivot(_))
+      val angles = sentence.rots.map(r => (r * -1) - angle)
+      val zipped = angles.zip(pun)
+      zipped.foreach(tup => drawDivot(tup._1, tup._2))
     }
     if (!sentence.isSingleWord) {
       drawCircle(g2d, Sentence.circle)
       drawDivots
-      drawCircle(g2d, Sentence.circle.addToRadius(LINE_WIDTH * 7))
+      drawCircle(g2d, outerCircle)
+    }
+  }
+
+  private def drawPunctation(g2d: Graphics2D, pun: Punctation, cir: Circle, outer: Circle): Unit = {
+    def close: Coord = cir.calcClosestTo(Sentence.circle.center)
+    pun match {
+      case Punctation.DOT =>
+        drawCircle(g2d, Circle(close, 20))
+      case Punctation.QUESTION =>
+        val first = rotate(cir.moveFromCenter(close, 0.9D), -10D, cir.center)
+        val second = rotate(cir.moveFromCenter(close, 0.9D), 10D, cir.center)
+        drawConsonantPoint(g2d, first, 5)
+        drawConsonantPoint(g2d, second, 5)
+      case Punctation.EXCLAIM =>
+        val first = rotate(cir.moveFromCenter(close, 0.9D), -15D, cir.center)
+        val middle = cir.moveFromCenter(close, 0.9D)
+        val second = rotate(cir.moveFromCenter(close, 0.9D), 15D, cir.center)
+        drawConsonantPoint(g2d, first, 5)
+        drawConsonantPoint(g2d, middle, 5)
+        drawConsonantPoint(g2d, second, 5)
+      case Punctation.DOUBLEQUOTE =>
+        drawLine(g2d, close, outer.calcClosestTo(close))
+      case Punctation.QUOTE =>
+        val first = rotate(close, -10D, cir.center)
+        val second = rotate(close, 10D, cir.center)
+        drawLine(g2d, first, rotate(outer.calcClosestTo(close), 10D, outer))
+        drawLine(g2d, second, rotate(outer.calcClosestTo(close), -10D, outer))
+      case Punctation.HYPHEN =>
+        val first = rotate(close, -15D, cir.center)
+        val second = rotate(close, 15D, cir.center)
+        drawLine(g2d, first, rotate(outer.calcClosestTo(close), 10D, outer))
+        drawLine(g2d, close, outer.calcClosestTo(close))
+        drawLine(g2d, second, rotate(outer.calcClosestTo(close), -10D, outer))
+      case Punctation.COMMA =>
+        drawConsonantPoint(g2d, close, 20)
+      case Punctation.SEMICOLON =>
+        drawConsonantPoint(g2d, cir.moveFromCenter(close, 0.9D), 5)
+      case Punctation.COLON =>
+        drawCircle(g2d, Circle(close, 20))
+        drawCircle(g2d, Circle(close, 16))
     }
   }
 
