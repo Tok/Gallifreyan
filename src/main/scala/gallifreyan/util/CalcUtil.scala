@@ -64,15 +64,15 @@ object CalcUtil {
 
   def calcOffsetAndSize(circle: Circle, con: Consonant): (Double, Int) = {
     val isOpenOrFull = con.circleType.equals(CircleType.OPEN) || con.circleType.equals(CircleType.FULL)
-    val offset = if (isOpenOrFull) { Math.toRadians(-90D) } else { Math.toRadians(-45D) }
-    val size = (circle.radius * 0.05D).intValue
+    val offset = if (isOpenOrFull) { Math.toRadians(-60D) } else { Math.toRadians(-30D) }
+    val size = (circle.radius * 0.07D).intValue
     (offset, size)
   }
 
   def calcDot(circle: Circle, angle: Double): Coord = {
-    val fac = circle.radius * 0.9D
-    val x = circle.center.x - (Math.sin(angle) * fac).intValue
-    val y = circle.center.y - (Math.cos(angle) * fac).intValue
+    val distanceToCenter = circle.radius * 0.85D
+    val x = circle.center.x - (Math.sin(angle) * distanceToCenter).intValue
+    val y = circle.center.y - (Math.cos(angle) * distanceToCenter).intValue
     Coord(x, y)
   }
 }

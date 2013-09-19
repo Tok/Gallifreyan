@@ -26,19 +26,20 @@ This application is running on OpenShift at: http://gallifreyan-9000.rhcloud.com
 
 ##### High Priority
 
-* Connect words to sentences
-* Implement punctation
 * Calculate and draw line connections
 * Input validation
 * Show an error and refuse translation when a word with too many syllables is entered.
 * Show an error and refuse translation when a sentence with too many words is entered.
 * Split tripple vowels
+* Add sentence divots
+* Implement punctation
 
 ##### Medium Priority
 
 * Allow manual line connections
 * Consider to draw syllables near the center for words with more than six syllables
 * Allow manual separation of vowels from syllables
+* Improve SVG output by using groups
 
 ##### Low Priority
 
