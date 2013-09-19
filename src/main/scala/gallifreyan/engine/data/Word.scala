@@ -5,6 +5,7 @@ import gallifreyan.engine.cases.Coord
 import gallifreyan.Size
 
 case class Word(val v: List[Syllable]) {
+  if(v.size > 7) { throw new IllegalArgumentException("Words are limited to 7 syllables.") }
   def zipRots: List[(Syllable, Double)] = v.zip((1 to v.size).map(i => 360D - (360D / v.size * i)).reverse.toList)
   def addSyllable(s: Syllable): Word = Word(v ::: List(s))
   def mkString: String = v.mkString

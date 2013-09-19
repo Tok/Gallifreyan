@@ -28,8 +28,6 @@ This application is running on OpenShift at: http://gallifreyan-9000.rhcloud.com
 
 * Calculate and draw line connections
 * Input validation
-* Show an error and refuse translation when a word with too many syllables is entered.
-* Show an error and refuse translation when a sentence with too many words is entered.
 * Split tripple vowels
 * Implement punctation
 

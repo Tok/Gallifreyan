@@ -5,6 +5,7 @@ import gallifreyan.engine.cases.Coord
 import gallifreyan.Size
 
 case class Sentence(val v: List[Word]) {
+  if(v.size > 5) { throw new IllegalArgumentException("Sentences are limited to 5 words.") }
   def rots: List[Double] = (1 to v.size).map(i => 360D - (360D / v.size * i)).reverse.toList
   def zipRots: List[(Word, Double)] = v.zip(rots)
   def addWord(w: Word): Sentence = Sentence(v ::: List(w))

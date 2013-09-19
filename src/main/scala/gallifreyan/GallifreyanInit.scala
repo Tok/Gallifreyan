@@ -3,7 +3,6 @@ package gallifreyan
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
 import com.vaadin.annotations.PreserveOnRefresh
 import com.vaadin.annotations.Theme
 import com.vaadin.annotations.Title
@@ -27,10 +26,10 @@ import com.vaadin.ui.UI
 import com.vaadin.ui.VerticalLayout
 import com.vaadin.ui.components.colorpicker.ColorChangeEvent
 import com.vaadin.ui.components.colorpicker.ColorChangeListener
-
 import gallifreyan.engine.ImageFormat
 import gallifreyan.util.ImageUtil
 import gallifreyan.util.TextUtil
+import com.vaadin.server.UserError
 
 @Title("Circular Gallifreyan Transliterator")
 @Theme("gallifreyantheme")
@@ -111,16 +110,27 @@ class GallifreyanInit extends UI {
 
   private def drawWords(): Unit = {
     val in = input.getValue
-    val sentence = TextUtil.makeSentence(input.getValue)
-    val sentenceString = sentence.mkString
-    Page.getCurrent.setUriFragment(sentenceString)
-    val fg = ImageUtil.makeAwtFromVaadinColor(fgPicker.getColor)
-    val bg = ImageUtil.makeAwtFromVaadinColor(bgPicker.getColor)
-    val svgBytes: Array[Byte] = ImageUtil.makeSvg(sentence, fg, bg, addText.getValue)
-    val imageName = sentenceString + "-" + df.format(new Date())
-    if (in.toUpperCase(Locale.getDefault).contains("C")) { showWarning("C has been replaced with K.") }
-    image.setSource(makeStreamResource(svgBytes, imageName))
-    image.markAsDirty
+    try {
+      val sentence = TextUtil.makeSentence(input.getValue)
+      input.setComponentError(None.orNull)
+      val sentenceString = sentence.mkString
+      Page.getCurrent.setUriFragment(sentenceString)
+      val fg = ImageUtil.makeAwtFromVaadinColor(fgPicker.getColor)
+      val bg = ImageUtil.makeAwtFromVaadinColor(bgPicker.getColor)
+      val svgBytes: Array[Byte] = ImageUtil.makeSvg(sentence, fg, bg, addText.getValue)
+      val imageName = sentenceString + "-" + df.format(new Date())
+      if (in.toUpperCase(Locale.getDefault).contains("C")) {
+        notify("C has been replaced with K.", Notification.Type.HUMANIZED_MESSAGE)
+      }
+      image.setSource(makeStreamResource(svgBytes, imageName))
+      image.markAsDirty
+    } catch {
+      case iae: IllegalArgumentException =>
+        notify(iae.getMessage, Notification.Type.ERROR_MESSAGE)
+        input.setComponentError(new UserError(iae.getMessage))
+        input.focus
+        input.selectAll
+    }
   }
 
   private def makeStreamResource(svgBytes: Array[Byte], imageName: String): StreamResource = {
@@ -133,8 +143,8 @@ class GallifreyanInit extends UI {
     }
   }
 
-  private def showWarning(message: String): Unit = {
-    val notification = new Notification(message, Notification.Type.HUMANIZED_MESSAGE)
+  private def notify(message: String, notType: Notification.Type): Unit = {
+    val notification = new Notification(message, notType)
     notification.setDelayMsec(500)
     notification.show(Page.getCurrent)
   }

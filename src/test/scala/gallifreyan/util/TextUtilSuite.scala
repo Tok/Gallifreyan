@@ -145,9 +145,9 @@ class TextUtilSuite extends AbstractTester {
   }
 
   test("Consonants") {
-    val cons = "BDFGHJKLMNPTRSVWYZX"
-    val result = TextUtil.makeWord(cons).toString
-    assert(result === "B_D_F_G_H_J_K_L_M_N_P_T_R_S_V_W_Y_Z_X")
+    assert(TextUtil.makeWord("BDFGHJK").toString === "B_D_F_G_H_J_K")
+    assert(TextUtil.makeWord("LMNPTRS").toString === "L_M_N_P_T_R_S")
+    assert(TextUtil.makeWord("VWYZX").toString === "V_W_Y_Z_X")
   }
 
   test("C to K") {
@@ -217,5 +217,17 @@ class TextUtilSuite extends AbstractTester {
   test("Sentence String") {
     val sentence = TextUtil.makeSentence("Test Test")
     assert(sentence.mkString === "TEST TEST")
+  }
+
+  test("Word Limit For Sentence") {
+    val inLimit = TextUtil.makeSentence("sha sha sha sha sha")
+    val e = intercept[IllegalArgumentException] { TextUtil.makeSentence("sha sha sha sha sha sha") }
+    assert(e.isInstanceOf[IllegalArgumentException])
+  }
+
+  test("Syllable Limit For Word") {
+    val inLimit = TextUtil.makeWord("shashashashashashasha")
+    val e = intercept[IllegalArgumentException] { TextUtil.makeWord("shashashashashashashasha") }
+    assert(e.isInstanceOf[IllegalArgumentException])
   }
 }
