@@ -73,7 +73,7 @@ object DrawUtil {
       val sc = Sentence.circle
       val offset = (sc.radius * 0.6D).intValue
       val radius = (sc.radius * 0.35D * sentRatio).intValue
-      val center = rotate(sc.center.addToY(offset), sentRot, sc)
+      val center = rotate(sc.center.addToY(offset), -sentRot, sc)
       Circle(center, radius)
     }
     drawCircle(g2d, wc)
