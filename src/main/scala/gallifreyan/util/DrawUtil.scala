@@ -105,8 +105,26 @@ object DrawUtil {
   private def writeText(g2d: Graphics2D, sentence: Sentence): Unit = g2d.drawString(sentence.mkString, 10, FONT.getSize)
 
   private def drawSentence(g2d: Graphics2D, sentence: Sentence): Unit = {
+    val divCircle = Sentence.circle.addToRadius((Sentence.circle.radius * 0.5D).intValue)
+    def drawDivot(angle: Double): Unit = {
+      val center = Coord(divCircle.center.x, divCircle.center.y + divCircle.radius)
+      val radius = Sentence.circle.radius * CalcUtil.calcSizeRatio(sentence.v.size + 1)
+      val circle = Circle(center, radius.intValue)
+      val (s, e) = CalcUtil.calcStartAndEnd(Sentence.circle, circle)
+      val rotE = rotate(e, angle, Sentence.circle.center)
+      val rotS = rotate(s, angle, Sentence.circle.center)
+      val rotatedCircle = Circle(rotate(center, angle, Sentence.circle.center), radius.intValue)
+      fillRect(g2d, rotatedCircle.center, rotE, rotS)
+      drawArc(g2d, rotatedCircle, rotE, rotS)
+    }
+    def drawDivots(): Unit = {
+      val angle = sentence.rots(1) / 2
+      val angles = sentence.rots.map(_ + angle)
+      angles.foreach(drawDivot(_))
+    }
     if (!sentence.isSingleWord) {
       drawCircle(g2d, Sentence.circle)
+      drawDivots
       drawCircle(g2d, Sentence.circle.addToRadius(LINE_WIDTH * 7))
     }
   }

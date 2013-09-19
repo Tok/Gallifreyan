@@ -31,7 +31,6 @@ This application is running on OpenShift at: http://gallifreyan-9000.rhcloud.com
 * Show an error and refuse translation when a word with too many syllables is entered.
 * Show an error and refuse translation when a sentence with too many words is entered.
 * Split tripple vowels
-* Add sentence divots
 * Implement punctation
 
 ##### Medium Priority

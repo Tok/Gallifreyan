@@ -5,7 +5,8 @@ import gallifreyan.engine.cases.Coord
 import gallifreyan.Size
 
 case class Sentence(val v: List[Word]) {
-  def zipRots: List[(Word, Double)] = v.zip((1 to v.size).map(i => 360D - (360D / v.size * i)).reverse.toList)
+  def rots: List[Double] = (1 to v.size).map(i => 360D - (360D / v.size * i)).reverse.toList
+  def zipRots: List[(Word, Double)] = v.zip(rots)
   def addWord(w: Word): Sentence = Sentence(v ::: List(w))
   def isSingleWord: Boolean = v.length == 1
   def mkString: String = v.map(_.mkString).mkString(" ")
