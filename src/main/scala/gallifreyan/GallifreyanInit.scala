@@ -29,11 +29,9 @@ import com.vaadin.ui.components.colorpicker.ColorChangeEvent
 import com.vaadin.ui.components.colorpicker.ColorChangeListener
 
 import gallifreyan.engine.ImageFormat
-import gallifreyan.engine.Size
 import gallifreyan.util.ImageUtil
 import gallifreyan.util.TextUtil
 
-@PreserveOnRefresh
 @Title("Circular Gallifreyan Transliterator")
 @Theme("gallifreyantheme")
 class GallifreyanInit extends UI {
@@ -65,7 +63,7 @@ class GallifreyanInit extends UI {
     input.setWidth(685 + PX)
     input.focus
     input.setImmediate(true)
-    input.addValueChangeListener(getValueChangeListener)
+    input.addValueChangeListener(makeValueChangeListener)
     inputLayout.addComponent(input)
     button.setWidth(150 + PX)
     inputLayout.addComponent(button)
@@ -82,15 +80,15 @@ class GallifreyanInit extends UI {
 
     inputLayout.addComponent(formatOption)
     fgPicker.setImmediate(true)
-    fgPicker.addColorChangeListener(getColorChangeListener)
+    fgPicker.addColorChangeListener(makeColorChangeListener)
     inputLayout.addComponent(fgPicker)
     bgPicker.setImmediate(true)
-    bgPicker.addColorChangeListener(getColorChangeListener)
+    bgPicker.addColorChangeListener(makeColorChangeListener)
     inputLayout.addComponent(bgPicker)
     addText.setWidth(100 + PX)
     addText.setValue(false)
     addText.setImmediate(true)
-    addText.addValueChangeListener(getValueChangeListener)
+    addText.addValueChangeListener(makeValueChangeListener)
     inputLayout.addComponent(addText)
 
     layout.addComponent(inputLayout)
@@ -113,23 +111,26 @@ class GallifreyanInit extends UI {
 
   private def drawWords(): Unit = {
     val in = input.getValue
-    val sentence = TextUtil.getSyllables(input.getValue)
-    val sentenceString = sentence.map(_.mkString).mkString
+    val sentence = TextUtil.makeSentence(input.getValue)
+    val sentenceString = sentence.mkString
     Page.getCurrent.setUriFragment(sentenceString)
-    val fg = ImageUtil.getAwtFromVaadinColor(fgPicker.getColor)
-    val bg = ImageUtil.getAwtFromVaadinColor(bgPicker.getColor)
+    val fg = ImageUtil.makeAwtFromVaadinColor(fgPicker.getColor)
+    val bg = ImageUtil.makeAwtFromVaadinColor(bgPicker.getColor)
     val svgBytes: Array[Byte] = ImageUtil.makeSvg(sentence, fg, bg, addText.getValue)
     val imageName = sentenceString + "-" + df.format(new Date())
-    val resource = if (formatOption.isSelected(ImageFormat.SVG)) {
+    if (in.toUpperCase(Locale.getDefault).contains("C")) { showWarning("C has been replaced with K.") }
+    image.setSource(makeStreamResource(svgBytes, imageName))
+    image.markAsDirty
+  }
+
+  private def makeStreamResource(svgBytes: Array[Byte], imageName: String): StreamResource = {
+    if (formatOption.isSelected(ImageFormat.SVG)) {
       val svgStreamSource = ImageUtil.makeStreamSource(svgBytes)
       new StreamResource(svgStreamSource, imageName + ImageFormat.SVG.extension)
     } else {
       val pngStreamSource = ImageUtil.makePngFromSvg(svgBytes)
       new StreamResource(pngStreamSource, imageName + ImageFormat.PNG.extension)
     }
-    image.setSource(resource)
-    if (in.toUpperCase(Locale.getDefault).contains("C")) { showWarning("C has been replaced with K.") }
-    image.markAsDirty
   }
 
   private def showWarning(message: String): Unit = {
@@ -138,13 +139,13 @@ class GallifreyanInit extends UI {
     notification.show(Page.getCurrent)
   }
 
-  private def getValueChangeListener(): ValueChangeListener = {
+  private def makeValueChangeListener(): ValueChangeListener = {
     new ValueChangeListener {
       override def valueChange(event: ValueChangeEvent): Unit = drawWords
     }
   }
 
-  private def getColorChangeListener(): ColorChangeListener = {
+  private def makeColorChangeListener(): ColorChangeListener = {
     new ColorChangeListener {
       override def colorChanged(event: ColorChangeEvent): Unit = drawWords
     }

@@ -7,19 +7,19 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.OutputStreamWriter
+
 import org.apache.batik.dom.GenericDOMImplementation
-import org.apache.batik.svggen.SVGGraphics2D
+import org.apache.batik.dom.svg.SVGDOMImplementation
+import org.apache.batik.svggen.SVGGeneratorContext
 import org.apache.batik.svggen.SVGGraphics2D
 import org.apache.batik.transcoder.TranscoderInput
 import org.apache.batik.transcoder.TranscoderOutput
-import org.apache.batik.transcoder.TranscodingHints
 import org.apache.batik.transcoder.image.PNGTranscoder
+
 import com.vaadin.server.StreamResource.StreamSource
-import gallifreyan.engine.Sentence
-import gallifreyan.engine.Size
-import org.apache.batik.svggen.SVGGeneratorContext
-import java.awt.Font
-import org.apache.batik.dom.svg.SVGDOMImplementation
+
+import gallifreyan.Size
+import gallifreyan.engine.data.Sentence
 
 object ImageUtil {
   def makeSvg(sentence: Sentence, fg: Color, bg: Color, addText: Boolean): Array[Byte] = {
@@ -43,8 +43,8 @@ object ImageUtil {
     buffer.toByteArray
   }
 
-  class Generate(val sent: Sentence, val fg: Color, val bg: Color, val addText: Boolean) {
-    def paint(g2d: Graphics2D): Unit = DrawUtil.drawSentence(g2d, sent, fg, bg, addText)
+  class Generate(val sentence: Sentence, val fg: Color, val bg: Color, val addText: Boolean) {
+    def paint(g2d: Graphics2D): Unit = DrawUtil.drawSentence(g2d, sentence, fg, bg, addText)
   }
 
   def makePngFromSvg(svgBytes: Array[Byte]): StreamSource = {
@@ -64,5 +64,5 @@ object ImageUtil {
     }
   }
 
-  def getAwtFromVaadinColor(col: com.vaadin.shared.ui.colorpicker.Color): java.awt.Color = new java.awt.Color(col.getRGB)
+  def makeAwtFromVaadinColor(col: com.vaadin.shared.ui.colorpicker.Color): java.awt.Color = new java.awt.Color(col.getRGB)
 }

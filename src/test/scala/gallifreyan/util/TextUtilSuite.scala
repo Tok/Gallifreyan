@@ -1,208 +1,221 @@
 package gallifreyan.util
 
 import org.junit.runner.RunWith
+
 import gallifreyan.AbstractTester
 import gallifreyan.engine.characters.Consonant
 import gallifreyan.engine.characters.Punctation
 import gallifreyan.engine.characters.Vowel
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class TextUtilSuite extends AbstractTester {
   test("Uppercase Vowel Characters") {
-    assert(TextUtil.getChar("A") === Vowel.A)
-    assert(TextUtil.getChar("E") === Vowel.E)
-    assert(TextUtil.getChar("I") === Vowel.I)
-    assert(TextUtil.getChar("O") === Vowel.O)
-    assert(TextUtil.getChar("U") === Vowel.U)
+    assert(TextUtil.makeChar("A") === Vowel.A)
+    assert(TextUtil.makeChar("E") === Vowel.E)
+    assert(TextUtil.makeChar("I") === Vowel.I)
+    assert(TextUtil.makeChar("O") === Vowel.O)
+    assert(TextUtil.makeChar("U") === Vowel.U)
   }
 
   test("Lowercase Vowel Characters") {
-    assert(TextUtil.getChar("a") === Vowel.A)
-    assert(TextUtil.getChar("e") === Vowel.E)
-    assert(TextUtil.getChar("i") === Vowel.I)
-    assert(TextUtil.getChar("o") === Vowel.O)
-    assert(TextUtil.getChar("u") === Vowel.U)
+    assert(TextUtil.makeChar("a") === Vowel.A)
+    assert(TextUtil.makeChar("e") === Vowel.E)
+    assert(TextUtil.makeChar("i") === Vowel.I)
+    assert(TextUtil.makeChar("o") === Vowel.O)
+    assert(TextUtil.makeChar("u") === Vowel.U)
   }
 
   test("Uppercase Consonant Characters") {
-    assert(TextUtil.getChar("B") === Consonant.B)
-    assert(TextUtil.getChar("D") === Consonant.D)
-    assert(TextUtil.getChar("F") === Consonant.F)
-    assert(TextUtil.getChar("G") === Consonant.G)
-    assert(TextUtil.getChar("H") === Consonant.H)
-    assert(TextUtil.getChar("J") === Consonant.J)
-    assert(TextUtil.getChar("K") === Consonant.K)
-    assert(TextUtil.getChar("L") === Consonant.L)
-    assert(TextUtil.getChar("M") === Consonant.M)
-    assert(TextUtil.getChar("N") === Consonant.N)
-    assert(TextUtil.getChar("P") === Consonant.P)
-    assert(TextUtil.getChar("T") === Consonant.T)
-    assert(TextUtil.getChar("R") === Consonant.R)
-    assert(TextUtil.getChar("S") === Consonant.S)
-    assert(TextUtil.getChar("V") === Consonant.V)
-    assert(TextUtil.getChar("W") === Consonant.W)
-    assert(TextUtil.getChar("Y") === Consonant.Y)
-    assert(TextUtil.getChar("Z") === Consonant.Z)
-    assert(TextUtil.getChar("X") === Consonant.X)
+    assert(TextUtil.makeChar("B") === Consonant.B)
+    assert(TextUtil.makeChar("D") === Consonant.D)
+    assert(TextUtil.makeChar("F") === Consonant.F)
+    assert(TextUtil.makeChar("G") === Consonant.G)
+    assert(TextUtil.makeChar("H") === Consonant.H)
+    assert(TextUtil.makeChar("J") === Consonant.J)
+    assert(TextUtil.makeChar("K") === Consonant.K)
+    assert(TextUtil.makeChar("L") === Consonant.L)
+    assert(TextUtil.makeChar("M") === Consonant.M)
+    assert(TextUtil.makeChar("N") === Consonant.N)
+    assert(TextUtil.makeChar("P") === Consonant.P)
+    assert(TextUtil.makeChar("T") === Consonant.T)
+    assert(TextUtil.makeChar("R") === Consonant.R)
+    assert(TextUtil.makeChar("S") === Consonant.S)
+    assert(TextUtil.makeChar("V") === Consonant.V)
+    assert(TextUtil.makeChar("W") === Consonant.W)
+    assert(TextUtil.makeChar("Y") === Consonant.Y)
+    assert(TextUtil.makeChar("Z") === Consonant.Z)
+    assert(TextUtil.makeChar("X") === Consonant.X)
   }
 
   test("Lowercase Consonant Characters") {
-    assert(TextUtil.getChar("b") === Consonant.B)
-    assert(TextUtil.getChar("d") === Consonant.D)
-    assert(TextUtil.getChar("f") === Consonant.F)
-    assert(TextUtil.getChar("g") === Consonant.G)
-    assert(TextUtil.getChar("h") === Consonant.H)
-    assert(TextUtil.getChar("j") === Consonant.J)
-    assert(TextUtil.getChar("k") === Consonant.K)
-    assert(TextUtil.getChar("l") === Consonant.L)
-    assert(TextUtil.getChar("m") === Consonant.M)
-    assert(TextUtil.getChar("n") === Consonant.N)
-    assert(TextUtil.getChar("p") === Consonant.P)
-    assert(TextUtil.getChar("t") === Consonant.T)
-    assert(TextUtil.getChar("r") === Consonant.R)
-    assert(TextUtil.getChar("s") === Consonant.S)
-    assert(TextUtil.getChar("v") === Consonant.V)
-    assert(TextUtil.getChar("w") === Consonant.W)
-    assert(TextUtil.getChar("y") === Consonant.Y)
-    assert(TextUtil.getChar("z") === Consonant.Z)
-    assert(TextUtil.getChar("x") === Consonant.X)
+    assert(TextUtil.makeChar("b") === Consonant.B)
+    assert(TextUtil.makeChar("d") === Consonant.D)
+    assert(TextUtil.makeChar("f") === Consonant.F)
+    assert(TextUtil.makeChar("g") === Consonant.G)
+    assert(TextUtil.makeChar("h") === Consonant.H)
+    assert(TextUtil.makeChar("j") === Consonant.J)
+    assert(TextUtil.makeChar("k") === Consonant.K)
+    assert(TextUtil.makeChar("l") === Consonant.L)
+    assert(TextUtil.makeChar("m") === Consonant.M)
+    assert(TextUtil.makeChar("n") === Consonant.N)
+    assert(TextUtil.makeChar("p") === Consonant.P)
+    assert(TextUtil.makeChar("t") === Consonant.T)
+    assert(TextUtil.makeChar("r") === Consonant.R)
+    assert(TextUtil.makeChar("s") === Consonant.S)
+    assert(TextUtil.makeChar("v") === Consonant.V)
+    assert(TextUtil.makeChar("w") === Consonant.W)
+    assert(TextUtil.makeChar("y") === Consonant.Y)
+    assert(TextUtil.makeChar("z") === Consonant.Z)
+    assert(TextUtil.makeChar("x") === Consonant.X)
   }
 
   test("Uppercase Double Consonants") {
-    assert(TextUtil.getChar("CH") === Consonant.CH)
-    assert(TextUtil.getChar("SH") === Consonant.SH)
-    assert(TextUtil.getChar("TH") === Consonant.TH)
-    assert(TextUtil.getChar("NG") === Consonant.NG)
-    assert(TextUtil.getChar("QU") === Consonant.QU)
+    assert(TextUtil.makeChar("CH") === Consonant.CH)
+    assert(TextUtil.makeChar("SH") === Consonant.SH)
+    assert(TextUtil.makeChar("TH") === Consonant.TH)
+    assert(TextUtil.makeChar("NG") === Consonant.NG)
+    assert(TextUtil.makeChar("QU") === Consonant.QU)
   }
 
   test("Lowercase Double Consonants") {
-    assert(TextUtil.getChar("ch") === Consonant.CH)
-    assert(TextUtil.getChar("sh") === Consonant.SH)
-    assert(TextUtil.getChar("th") === Consonant.TH)
-    assert(TextUtil.getChar("ng") === Consonant.NG)
-    assert(TextUtil.getChar("qu") === Consonant.QU)
+    assert(TextUtil.makeChar("ch") === Consonant.CH)
+    assert(TextUtil.makeChar("sh") === Consonant.SH)
+    assert(TextUtil.makeChar("th") === Consonant.TH)
+    assert(TextUtil.makeChar("ng") === Consonant.NG)
+    assert(TextUtil.makeChar("qu") === Consonant.QU)
   }
 
   test("Mixedcase Double Consonants") {
-    assert(TextUtil.getChar("Ch") === Consonant.CH)
-    assert(TextUtil.getChar("Sh") === Consonant.SH)
-    assert(TextUtil.getChar("Th") === Consonant.TH)
-    assert(TextUtil.getChar("Ng") === Consonant.NG)
-    assert(TextUtil.getChar("Qu") === Consonant.QU)
-    assert(TextUtil.getChar("cH") === Consonant.CH)
-    assert(TextUtil.getChar("sH") === Consonant.SH)
-    assert(TextUtil.getChar("tH") === Consonant.TH)
-    assert(TextUtil.getChar("nG") === Consonant.NG)
-    assert(TextUtil.getChar("qU") === Consonant.QU)
+    assert(TextUtil.makeChar("Ch") === Consonant.CH)
+    assert(TextUtil.makeChar("Sh") === Consonant.SH)
+    assert(TextUtil.makeChar("Th") === Consonant.TH)
+    assert(TextUtil.makeChar("Ng") === Consonant.NG)
+    assert(TextUtil.makeChar("Qu") === Consonant.QU)
+    assert(TextUtil.makeChar("cH") === Consonant.CH)
+    assert(TextUtil.makeChar("sH") === Consonant.SH)
+    assert(TextUtil.makeChar("tH") === Consonant.TH)
+    assert(TextUtil.makeChar("nG") === Consonant.NG)
+    assert(TextUtil.makeChar("qU") === Consonant.QU)
   }
 
   test("Punctation Characters") {
-    assert(TextUtil.getChar(".") === Punctation.DOT)
-    assert(TextUtil.getChar("?") === Punctation.QUESTION)
-    assert(TextUtil.getChar("!") === Punctation.EXCLAIM)
-    assert(TextUtil.getChar("\"") === Punctation.DOUBLEQUOTE)
-    assert(TextUtil.getChar("'") === Punctation.QUOTE)
-    assert(TextUtil.getChar("-") === Punctation.HYPHEN)
-    assert(TextUtil.getChar(",") === Punctation.COMMA)
-    assert(TextUtil.getChar(";") === Punctation.SEMICOLON)
-    assert(TextUtil.getChar(":") === Punctation.COLON)
-    assert(TextUtil.getChar(" ") === Punctation.SPACE)
+    assert(TextUtil.makeChar(".") === Punctation.DOT)
+    assert(TextUtil.makeChar("?") === Punctation.QUESTION)
+    assert(TextUtil.makeChar("!") === Punctation.EXCLAIM)
+    assert(TextUtil.makeChar("\"") === Punctation.DOUBLEQUOTE)
+    assert(TextUtil.makeChar("'") === Punctation.QUOTE)
+    assert(TextUtil.makeChar("-") === Punctation.HYPHEN)
+    assert(TextUtil.makeChar(",") === Punctation.COMMA)
+    assert(TextUtil.makeChar(";") === Punctation.SEMICOLON)
+    assert(TextUtil.makeChar(":") === Punctation.COLON)
+    assert(TextUtil.makeChar(" ") === Punctation.SPACE)
   }
 
   test("Illegal Characters") {
-    assert(TextUtil.getChar("+") === Punctation.SPACE)
-    assert(TextUtil.getChar("*") === Punctation.SPACE)
-    assert(TextUtil.getChar("=") === Punctation.SPACE)
-    assert(TextUtil.getChar("$") === Punctation.SPACE)
-    assert(TextUtil.getChar("/") === Punctation.SPACE)
-    assert(TextUtil.getChar("\\") === Punctation.SPACE)
-    assert(TextUtil.getChar("(") === Punctation.SPACE)
-    assert(TextUtil.getChar(")") === Punctation.SPACE)
-    assert(TextUtil.getChar("[") === Punctation.SPACE)
-    assert(TextUtil.getChar("]") === Punctation.SPACE)
-    assert(TextUtil.getChar("{") === Punctation.SPACE)
-    assert(TextUtil.getChar("}") === Punctation.SPACE)
-    assert(TextUtil.getChar("<") === Punctation.SPACE)
-    assert(TextUtil.getChar(">") === Punctation.SPACE)
-    assert(TextUtil.getChar("#") === Punctation.SPACE)
-    assert(TextUtil.getChar("@") === Punctation.SPACE)
-    assert(TextUtil.getChar("&") === Punctation.SPACE)
-    assert(TextUtil.getChar("^") === Punctation.SPACE)
-    assert(TextUtil.getChar("~") === Punctation.SPACE)
+    assert(TextUtil.makeChar("+") === Punctation.SPACE)
+    assert(TextUtil.makeChar("*") === Punctation.SPACE)
+    assert(TextUtil.makeChar("=") === Punctation.SPACE)
+    assert(TextUtil.makeChar("$") === Punctation.SPACE)
+    assert(TextUtil.makeChar("/") === Punctation.SPACE)
+    assert(TextUtil.makeChar("\\") === Punctation.SPACE)
+    assert(TextUtil.makeChar("(") === Punctation.SPACE)
+    assert(TextUtil.makeChar(")") === Punctation.SPACE)
+    assert(TextUtil.makeChar("[") === Punctation.SPACE)
+    assert(TextUtil.makeChar("]") === Punctation.SPACE)
+    assert(TextUtil.makeChar("{") === Punctation.SPACE)
+    assert(TextUtil.makeChar("}") === Punctation.SPACE)
+    assert(TextUtil.makeChar("<") === Punctation.SPACE)
+    assert(TextUtil.makeChar(">") === Punctation.SPACE)
+    assert(TextUtil.makeChar("#") === Punctation.SPACE)
+    assert(TextUtil.makeChar("@") === Punctation.SPACE)
+    assert(TextUtil.makeChar("&") === Punctation.SPACE)
+    assert(TextUtil.makeChar("^") === Punctation.SPACE)
+    assert(TextUtil.makeChar("~") === Punctation.SPACE)
   }
 
-  test("Vowels") {
+  test("Separated Vowels") {
     val aeiou = "AEIOU"
-    val result = TextUtil.getSyllables(aeiou).map(_.mkString).mkString
-    assert(result === aeiou)
+    val result = TextUtil.makeWord(aeiou).toString
+    assert(result === "A_E_I_O_U")
+  }
+
+  test("Aggregated Vowels") {
+    val aeiou = "AAEEII"
+    val result = TextUtil.makeWord(aeiou).toString
+    assert(result === "AA_EE_II")    
   }
 
   test("Consonants") {
     val cons = "BDFGHJKLMNPTRSVWYZX"
-    val result = TextUtil.getSyllables(cons).map(_.mkString).mkString
-    assert(result === cons)
+    val result = TextUtil.makeWord(cons).toString
+    assert(result === "B_D_F_G_H_J_K_L_M_N_P_T_R_S_V_W_Y_Z_X")
   }
 
   test("C to K") {
-    val result = TextUtil.getSyllables("C").map(_.mkString).mkString
+    val result = TextUtil.makeWord("C").toString
     assert(result === "K")
   }
 
   test("Doubles") {
-    assert(TextUtil.getSyllables("CH").map(_.mkString).mkString === "CH")
-    assert(TextUtil.getSyllables("SH").map(_.mkString).mkString === "SH")
-    assert(TextUtil.getSyllables("TH").map(_.mkString).mkString === "TH")
-    assert(TextUtil.getSyllables("NG").map(_.mkString).mkString === "NG")
-    assert(TextUtil.getSyllables("QU").map(_.mkString).mkString === "QU")
+    assert(TextUtil.makeWord("CH").toString === "CH")
+    assert(TextUtil.makeWord("SH").toString === "SH")
+    assert(TextUtil.makeWord("TH").toString === "TH")
+    assert(TextUtil.makeWord("NG").toString === "NG")
+    assert(TextUtil.makeWord("QU").toString === "QU")
   }
 
   test("Words") {
-    assert(TextUtil.getSyllables("BOW").map(_.mkString).mkString === "BOW")
-    assert(TextUtil.getSyllables("TIES").map(_.mkString).mkString === "TIES")
-    assert(TextUtil.getSyllables("ARE").map(_.mkString).mkString === "ARE")
-    assert(TextUtil.getSyllables("COOL").map(_.mkString).mkString === "KOOL")
-  }
-
-  test("Syllable Lists") {
-    assert(TextUtil.getSyllables("BOW").map(_.mkString).mkString("_") === "BO_W")
-    assert(TextUtil.getSyllables("TIES").map(_.mkString).mkString("_") === "TI_E_S")
-    assert(TextUtil.getSyllables("ARE").map(_.mkString).mkString("_") === "A_RE")
-    assert(TextUtil.getSyllables("COOL").map(_.mkString).mkString("_") === "KOO_L")
+    assert(TextUtil.makeWord("BOW").toString === "BO_W")
+    assert(TextUtil.makeWord("TIES").toString === "TI_E_S")
+    assert(TextUtil.makeWord("ARE").toString === "A_RE")
+    assert(TextUtil.makeWord("COOL").toString === "KOO_L")
   }
 
   test("C Relaced With K") {
-    assert(TextUtil.getSyllables("CAT").map(_.mkString).mkString("_") === "KA_T")
+    assert(TextUtil.makeWord("CAT").toString === "KA_T")
   }
 
   test("Q Relaced With QU") {
-    assert(TextUtil.getSyllables("FAQ").map(_.mkString).mkString("_") === "FA_QU")
+    assert(TextUtil.makeWord("FAQ").toString === "FA_QU")
   }
 
   test("QuU") {
-    assert(TextUtil.getSyllables("QuU").map(_.mkString).mkString("_") === "QUU")
+    assert(TextUtil.makeWord("QuU").toString === "QUU")
   }
 
   test("C In CH Not Relaced") {
-    assert(TextUtil.getSyllables("CHILL").map(_.mkString).mkString("_") === "CHI_LL")
-    assert(TextUtil.getSyllables("ORCHID").map(_.mkString).mkString("_") === "O_R_CHI_D")
-    assert(TextUtil.getSyllables("BACH").map(_.mkString).mkString("_") === "BA_CH")
+    assert(TextUtil.makeWord("CHILL").toString === "CHI_LL")
+    assert(TextUtil.makeWord("ORCHID").toString === "O_R_CHI_D")
+    assert(TextUtil.makeWord("BACH").toString === "BA_CH")
   }
 
   test("Double Consonant Aggregation") {
-    assert(TextUtil.getSyllables("ILL").map(_.mkString).mkString("_") === "I_LL")
-    assert(TextUtil.getSyllables("MMO").map(_.mkString).mkString("_") === "MMO")
-    assert(TextUtil.getSyllables("XX").map(_.mkString).mkString("_") === "XX")
+    assert(TextUtil.makeWord("ILL").toString === "I_LL")
+    assert(TextUtil.makeWord("MMO").toString === "MMO")
+    assert(TextUtil.makeWord("XX").toString === "XX")
   }
 
   test("Double Vowel Aggregation") {
-    assert(TextUtil.getSyllables("LII").map(_.mkString).mkString("_") === "LII")
-    assert(TextUtil.getSyllables("MOO").map(_.mkString).mkString("_") === "MOO")
-    assert(TextUtil.getSyllables("AA").map(_.mkString).mkString("_") === "AA")
+    assert(TextUtil.makeWord("LII").toString === "LII")
+    assert(TextUtil.makeWord("MOO").toString === "MOO")
+    assert(TextUtil.makeWord("AA").toString === "AA")
   }
 
   test("Different Double Vowel Separation") {
-    assert(TextUtil.getSyllables("TIE").map(_.mkString).mkString("_") === "TI_E")
+    assert(TextUtil.makeWord("TIE").toString === "TI_E")
+  }
+
+  test("Word String") {
+    val word = TextUtil.makeWord("Word")
+    assert(word.mkString === "WORD")
+  }
+
+  test("Sentence") {
+    val sentence = TextUtil.makeSentence("Test Test")
+    assert(sentence.toString === "TE_S_T+TE_S_T")
+  }
+  
+  test("Sentence String") {
+    val sentence = TextUtil.makeSentence("Test Test")
+    assert(sentence.mkString === "TEST TEST")
   }
 }

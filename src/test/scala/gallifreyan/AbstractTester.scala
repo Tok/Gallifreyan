@@ -5,7 +5,10 @@ import java.io.PrintStream
 import org.scalatest.BeforeAndAfter
 import org.scalatest.FunSuite
 import org.scalatest.mock.EasyMockSugar
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 abstract class AbstractTester extends FunSuite with EasyMockSugar with BeforeAndAfter {
   val printStream = System.err
 

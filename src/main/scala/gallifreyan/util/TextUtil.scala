@@ -1,15 +1,20 @@
 package gallifreyan.util
 
+import java.util.Locale
+
+import scala.Array.canBuildFrom
 import scala.annotation.tailrec
-import gallifreyan.engine.traits.Character
-import gallifreyan.engine.Sentence
+
 import gallifreyan.engine.characters.Consonant
 import gallifreyan.engine.characters.Punctation
 import gallifreyan.engine.characters.Vowel
-import java.util.Locale
+import gallifreyan.engine.data.Sentence
+import gallifreyan.engine.data.Syllable
+import gallifreyan.engine.data.Word
+import gallifreyan.engine.data.Character
 
 object TextUtil {
-  def getChar(in: String): Character = {
+  def makeChar(in: String): Character = {
     def other: Character = {
       in.toUpperCase(Locale.getDefault) match {
         case "C" => Consonant.K
@@ -22,37 +27,39 @@ object TextUtil {
     Vowel.valueOf(in).getOrElse(con)
   }
 
-  def getSyllables(in: String): Sentence = {
+  def makeSentence(in: String): Sentence = Sentence(in.split(" ").map(makeWord(_)).toList)
+
+  def makeWord(in: String): Word = {
     @tailrec
-    def makeSentence(accu: Sentence, chars: List[Char]): Sentence = {
+    def makeWord(accu: List[Syllable], chars: List[Char]): List[Syllable] = {
       def newChar: Character = {
         val first = chars.head.toString
         val both = if (chars.size > 1) { first + chars.tail.head.toString } else { first }
-        if (isDouble(both)) { getChar(both) } else { getChar(first) }
+        if (isDouble(both)) { makeChar(both) } else { makeChar(first) }
       }
-      def addToLast: Sentence = accu.init ::: List(accu.last ::: List(newChar))
-      def addAsNew: Sentence = accu ::: List(List(newChar))
-      def isLastEqual: Boolean = accu.last.last == newChar
-      def isLastVowel: Boolean = accu.last.last.isInstanceOf[Vowel]
+      def addToLast: List[Syllable] = accu.init ::: List(accu.last.addChar(newChar))
+      def addAsNew: List[Syllable] = accu ::: List(Syllable(List(newChar)))
+      def isLastEqual: Boolean = accu.last.v.last == newChar
+      def isLastVowel: Boolean = accu.last.v.last.isInstanceOf[Vowel]
       def getNext: List[Char] = {
         val skip = if (chars.size > 2) { chars.tail.tail } else { Nil }
         if (newChar.isDouble) { skip } else { chars.tail }
       }
       if (chars.isEmpty) { accu }
-      else if (accu.isEmpty) { makeSentence(accu ::: List(List(newChar)), getNext) }
+      else if (accu.isEmpty) { makeWord(accu ::: List(Syllable(List(newChar))), getNext) }
       else {
         newChar match {
           case c: Consonant =>
-            if (isLastEqual) { makeSentence(addToLast, chars.tail) }
-            else { makeSentence(addAsNew, getNext) }
+            if (isLastEqual) { makeWord(addToLast, chars.tail) }
+            else { makeWord(addAsNew, getNext) }
           case v: Vowel =>
-            if (isLastEqual || !isLastVowel) { makeSentence(addToLast, chars.tail) }
-            else { makeSentence(addAsNew, chars.tail) }
-          case _ => makeSentence(addToLast, chars.tail)
+            if (isLastEqual || !isLastVowel) { makeWord(addToLast, chars.tail) }
+            else { makeWord(addAsNew, chars.tail) }
+          case _ => makeWord(addToLast, chars.tail)
         }
       }
     }
-    makeSentence(Nil, in.toUpperCase(Locale.getDefault).toCharArray.toList)
+    Word(makeWord(Nil, in.toUpperCase(Locale.getDefault).toCharArray.toList))
   }
 
   private def isDouble(s: String): Boolean = {

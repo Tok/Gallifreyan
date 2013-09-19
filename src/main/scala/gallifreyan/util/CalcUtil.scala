@@ -1,7 +1,9 @@
 package gallifreyan.util
 
-import gallifreyan.engine.cases.Coord
 import gallifreyan.engine.cases.Circle
+import gallifreyan.engine.cases.Coord
+import gallifreyan.engine.characters.Consonant
+import gallifreyan.engine.CircleType
 
 object CalcUtil {
   def calcDistance(c1: Coord, c2: Coord): Double = {
@@ -41,7 +43,7 @@ object CalcUtil {
   }
 
   //http://mathworld.wolfram.com/CirclePacking.html
-  def getSizeRatio(size: Double): Double = {
+  def calcSizeRatio(size: Double): Double = {
     size match {
       case 0 | 1 | 2 => 1D
       case 3 => 2D / (1D + (2D / 3D) * Math.sqrt(3D))
@@ -52,5 +54,25 @@ object CalcUtil {
       case 8 => 2D / (1D + Math.sqrt(2D * (2D + Math.sqrt(2D))))
       case _ => 0.5D
     }
+  }
+
+  def calcLineEnd(circle: Circle, angle: Double, offset: Int): Coord = {
+    val x = circle.center.x - (Math.sin(angle) * circle.radius).intValue
+    val y = circle.center.y - (Math.cos(angle) * circle.radius).intValue - offset
+    Coord(x, y)
+  }
+
+  def calcOffsetAndSize(circle: Circle, con: Consonant): (Double, Int) = {
+    val isOpenOrFull = con.circleType.equals(CircleType.OPEN) || con.circleType.equals(CircleType.FULL)
+    val offset = if (isOpenOrFull) { Math.toRadians(-90D) } else { Math.toRadians(-45D) }
+    val size = (circle.radius * 0.05D).intValue
+    (offset, size)
+  }
+
+  def calcDot(circle: Circle, angle: Double): Coord = {
+    val fac = circle.radius * 0.9D
+    val x = circle.center.x - (Math.sin(angle) * fac).intValue
+    val y = circle.center.y - (Math.cos(angle) * fac).intValue
+    Coord(x, y)
   }
 }

@@ -2,7 +2,7 @@ package gallifreyan.engine.characters
 
 import gallifreyan.engine.CircleType
 import gallifreyan.engine.MarkType
-import gallifreyan.engine.traits.Character
+import gallifreyan.engine.data.Character
 
 sealed class Consonant(val circleType: CircleType, val markType: MarkType) extends Character {
   val isDouble = this.toString.size > 1

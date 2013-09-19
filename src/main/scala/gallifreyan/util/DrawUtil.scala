@@ -2,28 +2,24 @@ package gallifreyan.util
 
 import java.awt.BasicStroke
 import java.awt.Color
-import java.awt.Graphics2D
 import java.awt.Font
+import java.awt.Graphics2D
 import java.awt.geom.Arc2D
 import java.awt.geom.Ellipse2D
-import java.awt.geom.Rectangle2D
-import gallifreyan.engine.traits.Character
+
+import gallifreyan.Size
 import gallifreyan.engine.CircleType
-import gallifreyan.engine.cases.Coord
 import gallifreyan.engine.MarkType
-import gallifreyan.engine.Sentence
-import gallifreyan.engine.Size
-import gallifreyan.engine.Syllable
-import gallifreyan.engine.cases.Circle
 import gallifreyan.engine.VowelPosition
+import gallifreyan.engine.cases.Circle
+import gallifreyan.engine.cases.Coord
+import gallifreyan.engine.cases.Line
 import gallifreyan.engine.characters.Consonant
 import gallifreyan.engine.characters.Punctation
 import gallifreyan.engine.characters.Vowel
-import java.awt.geom.Point2D
-import gallifreyan.engine.cases.Connector
-import gallifreyan.engine.cases.Connection
-import gallifreyan.engine.cases.Line
-import java.awt.geom.Line2D
+import gallifreyan.engine.data.Sentence
+import gallifreyan.engine.data.Syllable
+import gallifreyan.engine.data.Character
 
 object DrawUtil {
   val conceptMode = true
@@ -35,7 +31,7 @@ object DrawUtil {
 
   val l: List[Double] = List(0)
 
-  def drawSentence(g2d: Graphics2D, sent: Sentence, fg: Color, bg: Color, addText: Boolean): Unit = {
+  def drawSentence(g2d: Graphics2D, sentence: Sentence, fg: Color, bg: Color, addText: Boolean): Unit = {
     //g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
     //g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY)
     g2d.setPaint(fg)
@@ -43,17 +39,20 @@ object DrawUtil {
     g2d.setStroke(STROKE)
     g2d.clearRect(0, 0, Size.width, Size.height)
     drawCircle(g2d, wc, false)
-    if (!sent.isEmpty) {
-      val rot = 360D / sent.size
-      val rots = (1 to sent.size).map(i => 360D - (rot * i)).reverse.toList
-      val sizeRatio = CalcUtil.getSizeRatio(sent.size)
-      val rotSent = sent.zip(rots)
+    if (!sentence.v.isEmpty) {
+
+      val word = sentence.v.head //FIXME implement
+
+      val rot = 360D / word.v.size
+      val rots = (1 to word.v.size).map(i => 360D - (rot * i)).reverse.toList
+      val sizeRatio = CalcUtil.calcSizeRatio(word.v.size)
+      val rotSent = word.v.zip(rots)
       val connectorLines: List[Set[Line]] = rotSent.map(si => drawSyllable(g2d, si._1, si._2, sizeRatio))
       markConnections(g2d, connectorLines)
       //val connectorPoints: List[Set[Coord]] = connectorLines.map(_.map(l => l.start))
       //drawConnections(g2d, connectorPoints)
     }
-    if (addText) { g2d.drawString(sent.map(_.mkString).mkString, 10, FONT.getSize) }
+    if (addText) { g2d.drawString(sentence.mkString, 10, FONT.getSize) }
     g2d.dispose
   }
 
@@ -62,13 +61,19 @@ object DrawUtil {
   }
 
   private def drawSyllable(g2d: Graphics2D, syl: Syllable, rot: Double, sizeRatio: Double): Set[Line] = {
-    def isDouble(i: Int, syl: Syllable): Boolean = i > 0 && syl(i) == syl(i - 1) //TODO don't access list by index
-    val lastCon = syl.head match {
+    def isDouble(i: Int, syl: Syllable): Boolean = i > 0 && syl.v(i) == syl.v(i - 1) //TODO don't access list by index
+    val lastCon = syl.v.head match {
       case con: Consonant => Some(con)
       case _ => None
     }
-    val connectors = syl.indices.map(i => drawCharacter(g2d, syl(i), getSyllableCircle(syl, sizeRatio), lastCon, isDouble(i, syl), sizeRatio, rot))
+    val connectors = syl.v.indices.map(i => drawCharacter(g2d, syl.v(i), makeSylCircle(syl, sizeRatio), lastCon, isDouble(i, syl), sizeRatio, rot))
     connectors.flatten.toSet
+  }
+
+  private def sc(): Circle = {
+    val sentenceCenter = Coord(Size.width / 2, Size.height / 2)
+    val sentenceRadius = (sentenceCenter.y * 0.9D).intValue
+    Circle(sentenceCenter, sentenceRadius)
   }
 
   private def wc(): Circle = {
@@ -77,15 +82,15 @@ object DrawUtil {
     Circle(wordCenter, wordRadius)
   }
 
-  private def getSyllableCircle(syl: Syllable, sizeRatio: Double): Circle = {
-    syl(0) match {
-      case con: Consonant => getConsonantCircle(con, wc, false, sizeRatio)
-      case _ => getConsonantCircle(Consonant.TH, wc, false, sizeRatio)
+  private def makeSylCircle(syl: Syllable, sizeRatio: Double): Circle = {
+    syl.v(0) match {
+      case con: Consonant => makeConCircle(con, wc, false, sizeRatio)
+      case _ => makeConCircle(Consonant.TH, wc, false, sizeRatio)
       //Vowels in syllables without constants use the same circle as Th
     }
   }
 
-  private def getConsonantCircle(con: Consonant, wordCircle: Circle, isDouble: Boolean, sizeRatio: Double): Circle = {
+  private def makeConCircle(con: Consonant, wordCircle: Circle, isDouble: Boolean, sizeRatio: Double): Circle = {
     val offset = (wordCircle.radius * con.circleType.offset).intValue
     val rat = if (isDouble) { con.circleType.doubleRatio } else { con.circleType.ratio }
     val radius = (wordCircle.radius * rat).intValue
@@ -108,13 +113,13 @@ object DrawUtil {
   }
 
   private def drawConsonant(g2d: Graphics2D, con: Consonant, isDouble: Boolean, sizeRatio: Double, rot: Double): Set[Line] = {
-    val original = getConsonantCircle(con, wc, isDouble, sizeRatio)
+    val original = makeConCircle(con, wc, isDouble, sizeRatio)
     def connCircle: Circle = original.addToRadius(CONN_MARK_SIZE)
     val circle = Circle(rotate(original.center, rot), original.radius)
     if (!con.circleType.isCrossing) { drawCircle(g2d, circle, false) } else {
       val (s, e) = CalcUtil.calcStartAndEnd(wc, original)
       drawArc(g2d, circle, rotate(e, rot), rotate(s, rot))
-      if (!isDouble) { drawCircle(g2d, circle.addToRadius(-(LINE_WIDTH / 2)), true) }
+      if (!isDouble) { drawCircle(g2d, circle.addToRadius(-HALF_LINE), true) }
     }
     if (isDouble) { Set.empty } else {
       def da: Double = Math.toRadians(10D)
@@ -122,33 +127,33 @@ object DrawUtil {
       con.markType match {
         case MarkType.NONE => Set.empty
         case MarkType.DOUBLE_DOT =>
-          val (offset, size) = getOffsetAndSize(circle, con)
-          drawConsonantPoint(g2d, rotate(getDot(original, offset + da), rot), size)
-          drawConsonantPoint(g2d, rotate(getDot(original, offset - da), rot), size)
+          val (offset, size) = CalcUtil.calcOffsetAndSize(circle, con)
+          drawConsonantPoint(g2d, rotate(CalcUtil.calcDot(original, offset + da), rot), size)
+          drawConsonantPoint(g2d, rotate(CalcUtil.calcDot(original, offset - da), rot), size)
           Set.empty
         case MarkType.TRIPPLE_DOT =>
-          val (offset, size) = getOffsetAndSize(circle, con)
-          drawConsonantPoint(g2d, rotate(getDot(original, offset + dda), rot), size)
-          drawConsonantPoint(g2d, rotate(getDot(original, offset), rot), size)
-          drawConsonantPoint(g2d, rotate(getDot(original, offset - dda), rot), size)
+          val (offset, size) = CalcUtil.calcOffsetAndSize(circle, con)
+          drawConsonantPoint(g2d, rotate(CalcUtil.calcDot(original, offset + dda), rot), size)
+          drawConsonantPoint(g2d, rotate(CalcUtil.calcDot(original, offset), rot), size)
+          drawConsonantPoint(g2d, rotate(CalcUtil.calcDot(original, offset - dda), rot), size)
           Set.empty
         case MarkType.TRIPPLE_LINE =>
-          val leftStart = rotate(getLineEnd(original, dda), rot)
-          val middleStart = rotate(getLineEnd(original, 0D), rot)
-          val rightStart = rotate(getLineEnd(original, -dda), rot)
-          val leftEnd = rotate(getLineEnd(connCircle, dda), rot)
-          val middleEnd = rotate(getLineEnd(connCircle, 0D), rot)
-          val rightEnd = rotate(getLineEnd(connCircle, -dda), rot)
+          val leftStart = rotate(CalcUtil.calcLineEnd(original, dda, HALF_LINE), rot)
+          val middleStart = rotate(CalcUtil.calcLineEnd(original, 0D, HALF_LINE), rot)
+          val rightStart = rotate(CalcUtil.calcLineEnd(original, -dda, HALF_LINE), rot)
+          val leftEnd = rotate(CalcUtil.calcLineEnd(connCircle, dda, HALF_LINE), rot)
+          val middleEnd = rotate(CalcUtil.calcLineEnd(connCircle, 0D, HALF_LINE), rot)
+          val rightEnd = rotate(CalcUtil.calcLineEnd(connCircle, -dda, HALF_LINE), rot)
           Set(Line(leftStart, leftEnd), Line(middleStart, middleEnd), Line(rightStart, rightEnd))
         case MarkType.LINE =>
-          val start = rotate(getLineEnd(original, 0D), rot)
-          val end = rotate(getLineEnd(connCircle, 0D), rot)
+          val start = rotate(CalcUtil.calcLineEnd(original, 0D, HALF_LINE), rot)
+          val end = rotate(CalcUtil.calcLineEnd(connCircle, 0D, HALF_LINE), rot)
           Set(Line(start, end))
         case MarkType.DOUBLE_LINE =>
-          val leftStart = rotate(getLineEnd(original, da), rot)
-          val rightStart = rotate(getLineEnd(original, -da), rot)
-          val leftEnd = rotate(getLineEnd(connCircle, da), rot)
-          val rightEnd = rotate(getLineEnd(connCircle, -da), rot)
+          val leftStart = rotate(CalcUtil.calcLineEnd(original, da, HALF_LINE), rot)
+          val rightStart = rotate(CalcUtil.calcLineEnd(original, -da, HALF_LINE), rot)
+          val leftEnd = rotate(CalcUtil.calcLineEnd(connCircle, da, HALF_LINE), rot)
+          val rightEnd = rotate(CalcUtil.calcLineEnd(connCircle, -da, HALF_LINE), rot)
           Set(Line(leftStart, leftEnd), Line(rightStart, rightEnd))
       }
     }
@@ -196,25 +201,7 @@ object DrawUtil {
     Set.empty //TODO implement
   }
 
-  private def getLineEnd(circle: Circle, angle: Double): Coord = {
-    val x = circle.center.x - (Math.sin(angle) * circle.radius).intValue
-    val y = circle.center.y - (Math.cos(angle) * circle.radius).intValue - HALF_LINE
-    Coord(x, y)
-  }
 
-  private def getOffsetAndSize(circle: Circle, con: Consonant): (Double, Int) = {
-    val isOpenOrFull = con.circleType.equals(CircleType.OPEN) || con.circleType.equals(CircleType.FULL)
-    val offset = if (isOpenOrFull) { Math.toRadians(-90D) } else { Math.toRadians(-45D) }
-    val size = (circle.radius * 0.05D).intValue
-    (offset, size)
-  }
-
-  private def getDot(circle: Circle, angle: Double): Coord = {
-    val fac = circle.radius * 0.9D
-    val x = circle.center.x - (Math.sin(angle) * fac).intValue
-    val y = circle.center.y - (Math.cos(angle) * fac).intValue
-    Coord(x, y)
-  }
 
   private def rotate(coord: Coord, angle: Double): Coord = rotate(coord, angle, wc.center)
   private def rotate(coord: Coord, angle: Double, center: Coord): Coord = {
@@ -261,41 +248,5 @@ object DrawUtil {
     g2d.setPaint(color)
     g2d.fill(new Ellipse2D.Double(pos.x - 2D, pos.y - 2D, 4D, 4D))
     g2d.setPaint(oldColor)
-  }
-
-  @deprecated("Needs better implementation after sentence construction is completed.", "2013-09-17")
-  private def drawConnections(g2d: Graphics2D, connectorPoints: List[Set[Coord]]): Unit = {
-    val halfSize = connectorPoints.size / 2
-    def makeConnector(c: Coord, i: Int): Connector = Connector(i, c, CalcUtil.calcDistance(c, wc.center))
-    def makeConnectorSet(s: Set[Coord], i: Int): Set[Connector] = s.map(makeConnector(_, i))
-    def getSwitchedIndex(i: Int): Int = (i + halfSize) % connectorPoints.size
-    def switchIndex(c: Connector): Connector = c.copy(index = getSwitchedIndex(c.index))
-    def isEven(i: Int): Boolean = i % 2 == 0
-    def sortCounterClock(cs: Set[Coord]): Set[Coord] = cs.toList.sortBy(c => CalcUtil.calcAngle(wc.center, c)).toSet
-    //val sorted = connectorPoints.map(_.toList.sortBy(c => (c.x, c.y)).toSet)
-    val sorted = connectorPoints.map(sortCounterClock(_))
-    val indexed = sorted.zipWithIndex
-    val conns = indexed.map(si => makeConnectorSet(si._1, si._2))
-    val flat = conns.flatten.sortBy(_.distanceToCenter).sortBy(_.index)
-    val halfRot = flat.map(c => switchIndex(c)).sortBy(_.index)
-    val zipped = flat.zip(halfRot)
-    val lines = zipped.map(z => Connection(z._1.coord, z._2.coord))
-    val even = if (!isEven(lines.size)) {
-      val angle = CalcUtil.calcAngle(wc.center, lines.head.from)
-      val rotEnd = rotate(Coord(wc.center.x, wc.center.y + wc.radius), 90D + angle)
-      drawLine(g2d, lines.head.from, rotEnd)
-      lines.tail
-    } else { lines }
-    /*
-     * TODO find closest unconnected with different index.. 1. right, then left, then center
-     * find closest unconnected with different index
-     * - first tripple right
-     * - then tripple left
-     * - then dual right
-     * - then dual left
-     * - then center
-     */
-    //even.takeRight(halfSize + 1).foreach(c => drawLine(g2d, c.from, c.to))
-    even.foreach(c => drawLine(g2d, c.from, c.to))
   }
 }

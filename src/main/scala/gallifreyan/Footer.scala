@@ -1,15 +1,14 @@
 package gallifreyan
 
-import com.vaadin.ui.VerticalLayout
-import com.vaadin.ui.Label
-import com.vaadin.ui.Link
 import com.vaadin.server.ExternalResource
-import com.vaadin.ui.HorizontalLayout
+import com.vaadin.server.ThemeResource
 import com.vaadin.ui.Alignment
 import com.vaadin.ui.Component
-import com.vaadin.ui.Image
-import com.vaadin.server.ThemeResource
 import com.vaadin.ui.GridLayout
+import com.vaadin.ui.HorizontalLayout
+import com.vaadin.ui.Label
+import com.vaadin.ui.Link
+import com.vaadin.ui.VerticalLayout
 
 class Footer extends VerticalLayout {
   val valid = new GridLayout(1, 1)

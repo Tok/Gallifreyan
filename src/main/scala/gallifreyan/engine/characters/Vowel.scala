@@ -1,7 +1,7 @@
 package gallifreyan.engine.characters
 
 import gallifreyan.engine.VowelPosition
-import gallifreyan.engine.traits.Character
+import gallifreyan.engine.data.Character
 
 sealed abstract class Vowel(val position: VowelPosition) extends Character {
   val isDouble = false

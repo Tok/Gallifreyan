@@ -1,6 +1,6 @@
 package gallifreyan.engine.characters
 
-import gallifreyan.engine.traits.Character
+import gallifreyan.engine.data.Character
 
 sealed abstract class Punctation(val value: String) extends Character {
   val isDouble = false

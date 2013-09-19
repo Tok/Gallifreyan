@@ -1,4 +1,4 @@
-package gallifreyan.engine.traits
+package gallifreyan.engine.data
 
 trait Character {
   val isDouble: Boolean
