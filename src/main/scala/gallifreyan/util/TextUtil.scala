@@ -39,23 +39,28 @@ object TextUtil {
       }
       def addToLast: List[Syllable] = accu.init ::: List(accu.last.addChar(newChar))
       def addAsNew: List[Syllable] = accu ::: List(Syllable(List(newChar)))
+      def isBeforeLastAndLastEqual: Boolean = isLastEqual && !accu.last.v.init.isEmpty && accu.last.v.init.last == newChar
       def isLastEqual: Boolean = accu.last.v.last == newChar
       def isLastVowel: Boolean = accu.last.v.last.isInstanceOf[Vowel]
+      def isLastPunctation: Boolean = accu.last.v.last.isInstanceOf[Punctation]
       def getNext: List[Char] = {
         val skip = if (chars.size > 2) { chars.tail.tail } else { Nil }
         if (newChar.isDouble) { skip } else { chars.tail }
       }
       if (chars.isEmpty) { accu }
-      else if (accu.isEmpty) { makeWord(accu ::: List(Syllable(List(newChar))), getNext) }
+      else if (accu.isEmpty) { makeWord(addAsNew, getNext) }
       else {
         newChar match {
           case c: Consonant =>
-            if (isLastEqual) { makeWord(addToLast, chars.tail) }
-            else { makeWord(addAsNew, getNext) }
+            if (!isLastEqual || isBeforeLastAndLastEqual) { makeWord(addAsNew, getNext) }
+            else { makeWord(addToLast, chars.tail) }
           case v: Vowel =>
-            if (isLastEqual || !isLastVowel) { makeWord(addToLast, chars.tail) }
-            else { makeWord(addAsNew, chars.tail) }
-          case _ => makeWord(addToLast, chars.tail)
+            if ((!isLastEqual && isLastVowel) || isBeforeLastAndLastEqual) { makeWord(addAsNew, chars.tail) }
+            else { makeWord(addToLast, chars.tail) }
+          case _ => {
+            if (isLastPunctation) { makeWord(addAsNew, getNext) }
+            else { makeWord(addToLast, chars.tail) }
+          }
         }
       }
     }

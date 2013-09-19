@@ -27,7 +27,6 @@ This application is running on OpenShift at: http://gallifreyan-9000.rhcloud.com
 ##### High Priority
 
 * Calculate and draw line connections
-* Split tripple vowels
 * Implement punctation
 
 ##### Medium Priority

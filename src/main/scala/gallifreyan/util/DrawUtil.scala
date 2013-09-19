@@ -149,7 +149,7 @@ object DrawUtil {
     c match {
       case con: Consonant => drawConsonant(g2d, con, isDouble, sizeRatio, -rot, wc)
       case vow: Vowel => drawVowel(g2d, vow, sylCircle, lastCon, isDouble, -rot, wc)
-      case pun: Punctation => drawPunctation(g2d, pun, -rot, wc)
+      case pun: Punctation => Set.empty
     }
   }
 
@@ -250,10 +250,6 @@ object DrawUtil {
         Set(Line(from, to))
       } else { Set.empty }
     }
-  }
-
-  private def drawPunctation(g2d: Graphics2D, pun: Punctation, rot: Double, wc: Circle): Set[Line] = {
-    Set.empty //TODO implement
   }
 
   private def rotate(coord: Coord, angle: Double, cir: Circle): Coord = rotate(coord, angle, cir.center)

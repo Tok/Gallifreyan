@@ -230,4 +230,33 @@ class TextUtilSuite extends AbstractTester {
     val e = intercept[IllegalArgumentException] { TextUtil.makeWord("shashashashashashashasha") }
     assert(e.isInstanceOf[IllegalArgumentException])
   }
+
+  test("Multi Vowel Split") {
+    val trippleA = TextUtil.makeWord("aaa")
+    assert(trippleA.toString === "AA_A")
+    val quadAa = TextUtil.makeWord("aaaa")
+    assert(quadAa.toString === "AA_AA")
+    val tripple = TextUtil.makeWord("shaaa")
+    assert(tripple.toString === "SHAA_A")
+  }
+
+  test("Multi Consonant Split") {
+    val trippleS = TextUtil.makeWord("sss")
+    assert(trippleS.toString === "SS_S")
+    val quadS = TextUtil.makeWord("ssss")
+    assert(quadS.toString === "SS_SS")
+    val trippleXs = TextUtil.makeWord("xsss")
+    assert(trippleXs.toString === "X_SS_S")
+    val trippleOs = TextUtil.makeWord("osss")
+    assert(trippleOs.toString === "O_SS_S")
+  }
+
+  test("Multi Punctation Split") {
+    val doubleDot = TextUtil.makeWord("..")
+    assert(doubleDot.toString === "._.")
+    val trippleDot = TextUtil.makeWord("...")
+    assert(trippleDot.toString === "._._.")
+    val dotComma = TextUtil.makeWord(".,")
+    assert(dotComma.toString === "._,")
+  }
 }
