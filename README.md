@@ -34,7 +34,8 @@ This application is running on OpenShift at: http://gallifreyan-9000.rhcloud.com
 * Allow manual line connections
 * Consider to draw syllables near the center for words with more than six syllables
 * Allow manual separation of vowels from syllables
-* Improve SVG output by using groups
+* Improve SVG output by using and better orders
+* Add SVG metadata
 
 ##### Low Priority
 

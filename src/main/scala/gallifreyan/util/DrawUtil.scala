@@ -50,16 +50,27 @@ object DrawUtil {
           sentence.zipRots.map(z => drawWord(g2d, z._1, z._2, sentSizeRatio, stubs)).flatten
         }
       }
-      if (stubs) { markConnections(g2d, connectorLines) }
-
-      //TODO implement
-      //val connectorPoints: List[Set[Coord]] = connectorLines.map(_.map(l => l.start))
-      //drawConnections(g2d, connectorPoints)
+      if (stubs) {
+        markStubs(g2d, connectorLines)
+      } else {
+        //println(connectorLines)
+        val connectorPoints: List[Coord] = connectorLines.map(_.map(l => l.start)).flatten
+        val connectorAngles: List[(Coord, Int)] = connectorPoints.map(c => (c, CalcUtil.calcAngle(Sentence.circle.center, c)))
+        connectLines(g2d, connectorAngles)        
+      }
 
       drawSentence(g2d, sentence)
       if (addText) { writeText(g2d, sentence) }
     }
     g2d.dispose
+  }
+
+  private def connectLines(g2d: Graphics2D, connectorAngles: List[(Coord, Int)]): Unit = {
+    //println(connectorAngles)
+  }
+
+  private def markStubs(g2d: Graphics2D, lineSets: LineSets): Unit = {
+    lineSets.map(_.toList).flatten.foreach(l => drawLine(g2d, l.start, l.end))
   }
 
   private def drawSingleWord(g2d: Graphics2D, word: Word, stubs: Boolean): LineSets = {
@@ -180,10 +191,6 @@ object DrawUtil {
     }
   }
 
-  private def markConnections(g2d: Graphics2D, lineSets: LineSets): Unit = {
-    lineSets.map(_.toList).flatten.foreach(l => drawLine(g2d, l.start, l.end))
-  }
-
   private def drawSyllable(g2d: Graphics2D, syl: Syllable, rot: Double, sizeRatio: Double,
     wc: Circle, stubs: Boolean, linesOnly: Boolean): Set[Line] = {
     def isDouble(i: Int, syl: Syllable): Boolean = i > 0 && syl.v(i) == syl.v(i - 1) //TODO don't access list by index
@@ -200,7 +207,7 @@ object DrawUtil {
     isDouble: Boolean, sizeRatio: Double, rot: Double, wc: Circle, stubs: Boolean, linesOnly: Boolean): Set[Line] = {
     c match {
       case con: Consonant => drawConsonant(g2d, con, isDouble, sizeRatio, -rot, wc, stubs, linesOnly)
-      case vow: Vowel => 
+      case vow: Vowel =>
         if (!linesOnly) { drawVowel(g2d, vow, sylCircle, lastCon, isDouble, -rot, wc, stubs) }
         else { Set.empty }
       case pun: Punctation => Set.empty
@@ -238,7 +245,7 @@ object DrawUtil {
           if (!linesOnly) {
             val (offset, size) = CalcUtil.calcOffsetAndSize(circle, con)
             drawConsonantPoint(g2d, rotate(CalcUtil.calcDot(original, offset + daDot), rot, wc), size)
-            drawConsonantPoint(g2d, rotate(CalcUtil.calcDot(original, offset - daDot), rot, wc), size)            
+            drawConsonantPoint(g2d, rotate(CalcUtil.calcDot(original, offset - daDot), rot, wc), size)
           }
           Set.empty
         case MarkType.TRIPPLE_DOT =>
@@ -336,7 +343,9 @@ object DrawUtil {
         drawLine(g2d, from, to)
         Set(Line(from, to))
       } else {
-        val realTo = sylCircle.calcClosestTo(to)
+        val realTo = if (vow.position.equals(VowelPosition.CENTER_IN)) { wc.calcFarthestFrom(from) }
+        else if (vow.position.equals(VowelPosition.CENTER_OUT)) { circle.moveFromCenter(from, 7D) }
+        else { to }
         drawLine(g2d, from, realTo)
         Set(Line(from, realTo))
       }
