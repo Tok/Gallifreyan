@@ -120,7 +120,7 @@ class GallifreyanInit extends UI {
   }
 
   private def drawWords(): Unit = {
-    val in = input.getValue
+    val in = input.getValue.replaceAll("( )+", " ")
     try {
       val sentence = TextUtil.makeSentence(input.getValue)
       input.setComponentError(None.orNull)

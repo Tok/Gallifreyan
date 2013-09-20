@@ -24,6 +24,8 @@ import gallifreyan.engine.data.Word
 import java.awt.Shape
 import java.awt.Rectangle
 import java.awt.Polygon
+import scala.collection.immutable.TreeSet
+import scala.util.Random
 
 object DrawUtil {
   val LINE_WIDTH = 2
@@ -53,59 +55,54 @@ object DrawUtil {
       if (addText) { writeText(g2d, sentence) }
       if (stubs) {
         markStubs(g2d, connectorLines)
-      } else {        
-        connectLinesToSc(g2d, connectorLines, sentence)
-        //connectLines(g2d, connectorLines)
+      } else {
+        //val rest = connectLines(g2d, connectorLines)
+        //connectLinesToSc(g2d, rest, sentence)
+        connectLinesToCircle(g2d, connectorLines.flatten, sentence)
       }
     }
     g2d.dispose
   }
 
-  private def connectLinesToSc(g2d: Graphics2D, connectorLines: LineSets, sentence: Sentence): Unit = {
-    def selectCircle: Circle = if (sentence.isSingleWord) { Sentence.circle } else { Sentence.outer(LINE_WIDTH) }
-    def calcInter(line: Line): Coord = CalcUtil.calcIntersection(line.start, line.end, selectCircle) 
-    connectorLines.flatten.foreach(line => drawLine(g2d, line.start, calcInter(line)))
+  private def connectLinesToCircle(g2d: Graphics2D, connectorLines: List[Line], sentence: Sentence): Unit = {
+    def selectCircle: Circle = if (sentence.isSingleWord) { Word.outer(LINE_WIDTH) } else { Sentence.outer(LINE_WIDTH) }
+    def calcInter(line: Line): Coord = CalcUtil.calcIntersection(line.start, line.end, selectCircle)
+    connectorLines.foreach(line => drawLine(g2d, line.start, calcInter(line)))
   }
 
-  private def connectLines(g2d: Graphics2D, connectorLines: LineSets): Unit = {
-    val orb = 40
+  /**
+   * 1. filter lines that point towards the center of sentence circle -> list of lines
+   * 2. pair up coords of lines that point towards each other within the tolerance of the defined orb -> list of lines
+   * 3. connect the closest pairs and make sure that every connector is only connected once
+   * 4. return the lines that have not been connected
+   */
+  private def connectLines(g2d: Graphics2D, connectorLines: LineSets): List[Line] = {
+    val orb = 20
     val cent = Sentence.circle.center
+    def pointToEachother(first: Int, second: Int): Boolean = {
+      val diff = Math.abs(first - second)
+      diff >= -orb && diff <= orb
+    }
+    def orderLine(line: Line): Line = {
+      if (line.start.x + line.start.y <= line.end.x + line.end.y) { line } else { Line(line.end, line.start) }
+    }
     def pointsToCenter(from: Coord, to: Coord): Boolean = {
-      println("from:" + Math.abs(CalcUtil.calcDistance(from, cent)))
-      println("to:" + Math.abs(CalcUtil.calcDistance(to, cent)))
-      println(Math.abs(CalcUtil.calcDistance(from, cent)) > Math.abs(CalcUtil.calcDistance(to, cent)))
       Math.abs(CalcUtil.calcDistance(from, cent)) > Math.abs(CalcUtil.calcDistance(to, cent))
     }
-
-    println("connectorLines: " + connectorLines)
-    val pointToCenter: List[Line] = connectorLines.flatten.filter(line => pointsToCenter(line.start, line.end))
-    println("pointToCenter: " + pointToCenter)
-    val connectorPoints: List[Coord] = pointToCenter.map(l => l.start)
-    println("connectorPoints: " + connectorPoints)
-    val connectorAngles: List[(Coord, Int)] = connectorPoints.map(c => (c, CalcUtil.calcAngle(c, cent)))
-    println("connectorAngles: " + connectorAngles)
-    val modded: List[(Coord, Int)] = connectorAngles.map(tup => (tup._1, (tup._2 + 360) % 360))
-    println("modded: " + modded)
-    val byDist: List[(Coord, Int)] = modded.sortBy(tup => CalcUtil.calcDistance(Sentence.circle.center, tup._1))
-    println("byDist: " + byDist)
-
-    val pairs: List[(Coord, Coord)] = for {
-      tup1: (Coord, Int) <- byDist
-      tup2: (Coord, Int) <- byDist
-    } yield {
-      val angleDiff = tup1._2 - tup2._2
-      if (angleDiff - 180 >= -orb && angleDiff - 180 <= orb) {
-        (tup1._1, tup2._1)
-      } else {
-        (Coord(0, 0), Coord(0, 0))
-      }
-    }
-    val filtered = pairs.filterNot(_._1 == Coord(0, 0))
-
-    println("filtered: " + filtered)
-    println("-----------------")
-
-    filtered.foreach(pair => drawLine(g2d, pair._1, pair._2))
+    val linesPointToCenter: List[Line] = connectorLines.flatten.filter(line => pointsToCenter(line.start, line.end))
+    val connectorPoints: List[Coord] = linesPointToCenter.map(_.start)
+    val connectorAngles: List[(Coord, Int)] = connectorPoints.map(c => (c, (CalcUtil.calcAngle(c, cent) + 360) % 360))
+    val lineOptions: List[Option[Line]] = for {
+      tup1: (Coord, Int) <- connectorAngles
+      tup2: (Coord, Int) <- connectorAngles
+    } yield { if (pointToEachother(tup1._2, tup2._2)) { Some(Line(tup1._1, tup2._1)) } else { None } }
+    val lines = lineOptions.filterNot(_ == None).map(_.get).map(orderLine(_)).filterNot(l => l.start == l.end)
+    val tree = TreeSet[Line]() ++ lines.toSet
+    val uniques = tree.toList
+    uniques.foreach(l => drawLine(g2d, l.start, l.end))
+    //FIXME
+    val connected: List[Coord] = uniques.map(_.start) ::: lines.map(_.end)
+    connectorLines.flatten.filterNot(l => connected.contains(l.start) || connected.contains(l.end))
   }
 
   private def markStubs(g2d: Graphics2D, lineSets: LineSets): Unit = {
@@ -182,6 +179,8 @@ object DrawUtil {
       drawCircle(g2d, Sentence.circle)
       drawDivots
       drawCircle(g2d, Sentence.outer(LINE_WIDTH))
+    } else {
+      drawCircle(g2d, Word.outer(LINE_WIDTH))
     }
   }
 
@@ -237,7 +236,7 @@ object DrawUtil {
   }
 
   private def drawCharacter(g2d: Graphics2D, c: Character, sylCircle: Circle, lastCon: Option[Consonant],
-      isDouble: Boolean, sizeRatio: Double, rot: Double, wc: Circle): Set[Line] = {
+    isDouble: Boolean, sizeRatio: Double, rot: Double, wc: Circle): Set[Line] = {
     c match {
       case con: Consonant => drawConsonant(g2d, con, isDouble, sizeRatio, -rot, wc)
       case vow: Vowel => drawVowel(g2d, vow, sylCircle, lastCon, isDouble, -rot, wc)
@@ -246,7 +245,7 @@ object DrawUtil {
   }
 
   private def drawConsonant(g2d: Graphics2D, con: Consonant, isDouble: Boolean, sizeRatio: Double,
-      rot: Double, wc: Circle): Set[Line] = {
+    rot: Double, wc: Circle): Set[Line] = {
     val original = makeConCircle(con, wc, isDouble, sizeRatio)
     def connCircle: Circle = original.addToRadius(CONN_MARK_SIZE)
     val circle = Circle(CalcUtil.rotate(original.center, rot, wc.center), original.radius)

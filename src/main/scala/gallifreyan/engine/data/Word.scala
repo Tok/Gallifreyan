@@ -15,7 +15,8 @@ case class Word(val v: List[Syllable]) {
 object Word {
   def circle(): Circle = {
     val center = Coord(Size.width / 2, Size.height / 2)
-    val radius = (center.y * 0.7D).intValue
+    val radius = (center.y * 0.8D).intValue
     Circle(center, radius)
   }
+  def outer(lineWidth: Int): Circle = circle.addToRadius(lineWidth * 7)
 }

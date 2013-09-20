@@ -1,6 +1,6 @@
 package gallifreyan.engine.cases
 
-case class Coord(val x: Int, val y: Int) {
+case class Coord(val x: Int, val y: Int) extends Ordered[Coord] {
   def compare(that: Coord): Int = x.compare(that.x) match {
     case 0 => y.compare(that.y)
     case res: Any => res

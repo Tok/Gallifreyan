@@ -28,7 +28,6 @@ This application is running on OpenShift at: http://gallifreyan-9000.rhcloud.com
 
 * Calculate and draw direct line connections
 * Improve code quality and reduce redundancies
-* Prevent error on double spaces
 
 ##### Medium Priority
 
