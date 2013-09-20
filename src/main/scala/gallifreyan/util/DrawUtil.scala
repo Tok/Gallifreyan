@@ -26,12 +26,11 @@ import java.awt.Rectangle
 import java.awt.Polygon
 
 object DrawUtil {
-  val conceptMode = true
   val LINE_WIDTH = 2
   val HALF_LINE = LINE_WIDTH / 2
   val STROKE = new BasicStroke(LINE_WIDTH)
   val FONT = new Font(Font.MONOSPACED, Font.BOLD, 30)
-  val CONN_MARK_SIZE = 14
+  val CONN_MARK_SIZE = 20
 
   type LineSets = List[Set[Line]]
 
@@ -44,10 +43,10 @@ object DrawUtil {
     g2d.clearRect(0, 0, Size.width, Size.height)
     if (!sentence.v.isEmpty) {
       val connectorLines: LineSets = {
-        if (sentence.isSingleWord) { drawSingleWord(g2d, sentence.v.head, stubs) }
+        if (sentence.isSingleWord) { drawSingleWord(g2d, sentence.v.head) }
         else {
           val sentSizeRatio = CalcUtil.calcSizeRatio(sentence.v.size)
-          sentence.zipRots.map(z => drawWord(g2d, z._1, z._2, sentSizeRatio, stubs)).flatten
+          sentence.zipRots.map(z => drawWord(g2d, z._1, z._2, sentSizeRatio)).flatten
         }
       }
       drawSentence(g2d, sentence)
@@ -65,7 +64,7 @@ object DrawUtil {
   private def connectLinesToSc(g2d: Graphics2D, connectorLines: LineSets, sentence: Sentence): Unit = {
     def selectCircle: Circle = if (sentence.isSingleWord) { Sentence.circle } else { Sentence.outer(LINE_WIDTH) }
     def calcInter(line: Line): Coord = CalcUtil.calcIntersection(line.start, line.end, selectCircle) 
-    connectorLines.flatten.foreach(line => drawLine(g2d, line.end, calcInter(line)))
+    connectorLines.flatten.foreach(line => drawLine(g2d, line.start, calcInter(line)))
   }
 
   private def connectLines(g2d: Graphics2D, connectorLines: LineSets): Unit = {
@@ -113,14 +112,13 @@ object DrawUtil {
     lineSets.map(_.toList).flatten.foreach(l => drawLine(g2d, l.start, l.end))
   }
 
-  private def drawSingleWord(g2d: Graphics2D, word: Word, stubs: Boolean): LineSets = {
+  private def drawSingleWord(g2d: Graphics2D, word: Word): LineSets = {
     drawCircle(g2d, Word.circle)
     val wordSizeRatio = CalcUtil.calcSizeRatio(word.v.size)
-    word.zipRots.map(z => drawSyllable(g2d, z._1, z._2, wordSizeRatio, Word.circle, stubs, true))
-    word.zipRots.map(z => drawSyllable(g2d, z._1, z._2, wordSizeRatio, Word.circle, stubs, false))
+    word.zipRots.map(z => drawSyllable(g2d, z._1, z._2, wordSizeRatio, Word.circle))
   }
 
-  private def drawWord(g2d: Graphics2D, word: Word, sentRot: Double, sentRatio: Double, stubs: Boolean): LineSets = {
+  private def drawWord(g2d: Graphics2D, word: Word, sentRot: Double, sentRatio: Double): LineSets = {
     def wc: Circle = {
       val sc = Sentence.circle
       val offset = (sc.radius * 0.6D).intValue
@@ -130,8 +128,7 @@ object DrawUtil {
     }
     drawCircle(g2d, wc)
     val wordSizeRatio = CalcUtil.calcSizeRatio(word.v.size)
-    word.zipRots.map(z => drawSyllable(g2d, z._1, z._2, wordSizeRatio, wc, stubs, true))
-    word.zipRots.map(z => drawSyllable(g2d, z._1, z._2, wordSizeRatio, wc, stubs, false))
+    word.zipRots.map(z => drawSyllable(g2d, z._1, z._2, wordSizeRatio, wc))
   }
 
   private def makeSylCircle(syl: Syllable, sizeRatio: Double, wordCircle: Circle): Circle = {
@@ -228,48 +225,43 @@ object DrawUtil {
     }
   }
 
-  private def drawSyllable(g2d: Graphics2D, syl: Syllable, rot: Double, sizeRatio: Double,
-    wc: Circle, stubs: Boolean, linesOnly: Boolean): Set[Line] = {
+  private def drawSyllable(g2d: Graphics2D, syl: Syllable, rot: Double, sizeRatio: Double, wc: Circle): Set[Line] = {
     def isDouble(i: Int, syl: Syllable): Boolean = i > 0 && syl.v(i) == syl.v(i - 1) //TODO don't access list by index
     val lastCon = syl.v.head match {
       case con: Consonant => Some(con)
       case _ => None
     }
     val sylCircle = makeSylCircle(syl, sizeRatio, wc)
-    val connectors = syl.v.indices.map(i => drawCharacter(g2d, syl.v(i), sylCircle, lastCon, isDouble(i, syl), sizeRatio, rot, wc, stubs, linesOnly))
+    val connectors = syl.v.indices.map(i => drawCharacter(g2d, syl.v(i), sylCircle, lastCon, isDouble(i, syl), sizeRatio, rot, wc))
     connectors.flatten.toSet
   }
 
   private def drawCharacter(g2d: Graphics2D, c: Character, sylCircle: Circle, lastCon: Option[Consonant],
-    isDouble: Boolean, sizeRatio: Double, rot: Double, wc: Circle, stubs: Boolean, linesOnly: Boolean): Set[Line] = {
+      isDouble: Boolean, sizeRatio: Double, rot: Double, wc: Circle): Set[Line] = {
     c match {
-      case con: Consonant => drawConsonant(g2d, con, isDouble, sizeRatio, -rot, wc, stubs, linesOnly)
-      case vow: Vowel =>
-        if (!linesOnly) { drawVowel(g2d, vow, sylCircle, lastCon, isDouble, -rot, wc, stubs) }
-        else { Set.empty }
+      case con: Consonant => drawConsonant(g2d, con, isDouble, sizeRatio, -rot, wc)
+      case vow: Vowel => drawVowel(g2d, vow, sylCircle, lastCon, isDouble, -rot, wc)
       case pun: Punctation => Set.empty
     }
   }
 
   private def drawConsonant(g2d: Graphics2D, con: Consonant, isDouble: Boolean, sizeRatio: Double,
-    rot: Double, wc: Circle, stubs: Boolean, linesOnly: Boolean): Set[Line] = {
+      rot: Double, wc: Circle): Set[Line] = {
     val original = makeConCircle(con, wc, isDouble, sizeRatio)
     def connCircle: Circle = original.addToRadius(CONN_MARK_SIZE)
     val circle = Circle(CalcUtil.rotate(original.center, rot, wc.center), original.radius)
-    if (!linesOnly) {
-      if (!con.circleType.isCrossing) { drawCircle(g2d, circle) }
-      else {
-        val (s, e) = CalcUtil.calcStartAndEnd(wc, original)
-        val rotE = CalcUtil.rotate(e, rot, wc.center)
-        val rotS = CalcUtil.rotate(s, rot, wc.center)
-        if (!isDouble) {
-          con.circleType match {
-            case CircleType.HALF if stubs => fillRect(g2d, circle.center, rotE, rotS)
-            case _ => fillCircle(g2d, circle.addToRadius(-HALF_LINE))
-          }
+    if (!con.circleType.isCrossing) { drawCircle(g2d, circle) }
+    else {
+      val (s, e) = CalcUtil.calcStartAndEnd(wc, original)
+      val rotE = CalcUtil.rotate(e, rot, wc.center)
+      val rotS = CalcUtil.rotate(s, rot, wc.center)
+      if (!isDouble) {
+        con.circleType match {
+          case CircleType.HALF => fillRect(g2d, circle.center, rotE, rotS)
+          case _ => fillCircle(g2d, circle.addToRadius(-HALF_LINE))
         }
-        drawArc(g2d, circle, rotE, rotS)
       }
+      drawArc(g2d, circle, rotE, rotS)
     }
     if (isDouble) { Set.empty } else {
       def da: Double = Math.toRadians(10D)
@@ -279,62 +271,40 @@ object DrawUtil {
       con.markType match {
         case MarkType.NONE => Set.empty
         case MarkType.DOUBLE_DOT =>
-          if (!linesOnly) {
-            val (offset, size) = CalcUtil.calcOffsetAndSize(circle, con)
-            drawConsonantPoint(g2d, CalcUtil.rotate(CalcUtil.calcDot(original, offset + daDot), rot, wc.center), size)
-            drawConsonantPoint(g2d, CalcUtil.rotate(CalcUtil.calcDot(original, offset - daDot), rot, wc.center), size)
-          }
+          val (offset, size) = CalcUtil.calcOffsetAndSize(circle, con)
+          drawConsonantPoint(g2d, CalcUtil.rotate(CalcUtil.calcDot(original, offset + daDot), rot, wc.center), size)
+          drawConsonantPoint(g2d, CalcUtil.rotate(CalcUtil.calcDot(original, offset - daDot), rot, wc.center), size)
           Set.empty
         case MarkType.TRIPPLE_DOT =>
-          if (!linesOnly) {
-            val (offset, size) = CalcUtil.calcOffsetAndSize(circle, con)
-            drawConsonantPoint(g2d, CalcUtil.rotate(CalcUtil.calcDot(original, offset + ddaDot), rot, wc.center), size)
-            drawConsonantPoint(g2d, CalcUtil.rotate(CalcUtil.calcDot(original, offset), rot, wc.center), size)
-            drawConsonantPoint(g2d, CalcUtil.rotate(CalcUtil.calcDot(original, offset - ddaDot), rot, wc.center), size)
-          }
+          val (offset, size) = CalcUtil.calcOffsetAndSize(circle, con)
+          drawConsonantPoint(g2d, CalcUtil.rotate(CalcUtil.calcDot(original, offset + ddaDot), rot, wc.center), size)
+          drawConsonantPoint(g2d, CalcUtil.rotate(CalcUtil.calcDot(original, offset), rot, wc.center), size)
+          drawConsonantPoint(g2d, CalcUtil.rotate(CalcUtil.calcDot(original, offset - ddaDot), rot, wc.center), size)
           Set.empty
         case MarkType.TRIPPLE_LINE =>
-          if (linesOnly) {
-            val leftStart = CalcUtil.rotate(CalcUtil.calcLineEnd(original, dda, HALF_LINE), rot, wc.center)
-            val middleStart = CalcUtil.rotate(CalcUtil.calcLineEnd(original, 0D, HALF_LINE), rot, wc.center)
-            val rightStart = CalcUtil.rotate(CalcUtil.calcLineEnd(original, -dda, HALF_LINE), rot, wc.center)
-            val leftEnd = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, dda, HALF_LINE), rot, wc.center)
-            val middleEnd = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, 0D, HALF_LINE), rot, wc.center)
-            val rightEnd = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, -dda, HALF_LINE), rot, wc.center)
-            if (stubs) {
-              Set(Line(leftStart, leftEnd), Line(middleStart, middleEnd), Line(rightStart, rightEnd))
-            } else {
-              Set(Line(circle.center, leftStart), Line(circle.center, middleStart), Line(circle.center, rightStart))
-            }
-          } else { Set.empty }
+          val leftStart = CalcUtil.rotate(CalcUtil.calcLineEnd(original, dda, HALF_LINE), rot, wc.center)
+          val middleStart = CalcUtil.rotate(CalcUtil.calcLineEnd(original, 0D, HALF_LINE), rot, wc.center)
+          val rightStart = CalcUtil.rotate(CalcUtil.calcLineEnd(original, -dda, HALF_LINE), rot, wc.center)
+          val leftEnd = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, dda, HALF_LINE), rot, wc.center)
+          val middleEnd = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, 0D, HALF_LINE), rot, wc.center)
+          val rightEnd = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, -dda, HALF_LINE), rot, wc.center)
+          Set(Line(leftStart, leftEnd), Line(middleStart, middleEnd), Line(rightStart, rightEnd))
         case MarkType.LINE =>
-          if (linesOnly) {
-            val start = CalcUtil.rotate(CalcUtil.calcLineEnd(original, 0D, HALF_LINE), rot, wc.center)
-            val end = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, 0D, HALF_LINE), rot, wc.center)
-            if (stubs) {
-              Set(Line(start, end))
-            } else {
-              Set(Line(circle.center, start))
-            }
-          } else { Set.empty }
+          val start = CalcUtil.rotate(CalcUtil.calcLineEnd(original, 0D, HALF_LINE), rot, wc.center)
+          val end = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, 0D, HALF_LINE), rot, wc.center)
+          Set(Line(start, end))
         case MarkType.DOUBLE_LINE =>
-          if (linesOnly) {
-            val leftStart = CalcUtil.rotate(CalcUtil.calcLineEnd(original, da, HALF_LINE), rot, wc.center)
-            val rightStart = CalcUtil.rotate(CalcUtil.calcLineEnd(original, -da, HALF_LINE), rot, wc.center)
-            val leftEnd = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, da, HALF_LINE), rot, wc.center)
-            val rightEnd = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, -da, HALF_LINE), rot, wc.center)
-            if (stubs) {
-              Set(Line(leftStart, leftEnd), Line(rightStart, rightEnd))
-            } else {
-              Set(Line(circle.center, leftStart), Line(circle.center, rightStart))
-            }
-          } else { Set.empty }
+          val leftStart = CalcUtil.rotate(CalcUtil.calcLineEnd(original, da, HALF_LINE), rot, wc.center)
+          val rightStart = CalcUtil.rotate(CalcUtil.calcLineEnd(original, -da, HALF_LINE), rot, wc.center)
+          val leftEnd = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, da, HALF_LINE), rot, wc.center)
+          val rightEnd = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, -da, HALF_LINE), rot, wc.center)
+          Set(Line(leftStart, leftEnd), Line(rightStart, rightEnd))
       }
     }
   }
 
   private def drawVowel(g2d: Graphics2D, vow: Vowel, sylCircle: Circle, lastCon: Option[Consonant],
-    isDouble: Boolean, rot: Double, wc: Circle, stubs: Boolean): Set[Line] = {
+    isDouble: Boolean, rot: Double, wc: Circle): Set[Line] = {
     def offset: Int = (sylCircle.radius * vow.position.offset).intValue
     def halfOff: Int = offset / 2
     val original = if (vow.position.equals(VowelPosition.OUT)) {
@@ -363,23 +333,15 @@ object DrawUtil {
     }
     val circle = Circle(center, radius)
     drawCircle(g2d, circle)
-    def getResult(from: Coord, to: Coord): Set[Line] = {
-      if (stubs) {
-        Set(Line(from, to))
-      } else {
-        Set(Line(circle.center, from))
-      }
-    }
     if (isDouble) { Set.empty } else {
-      def lineLength: Int = sylCircle.radius / 3
       if (vow.position.equals(VowelPosition.CENTER_IN)) {
         val from = CalcUtil.rotate(original.addToY(-radius), rot, wc.center)
-        val to = CalcUtil.rotate(original.addToY(-radius - lineLength), rot, wc.center)
-        getResult(from, to)
+        val to = CalcUtil.rotate(original.addToY(-radius - CONN_MARK_SIZE), rot, wc.center)
+        Set(Line(from, to))
       } else if (vow.position.equals(VowelPosition.CENTER_OUT)) {
         val from = CalcUtil.rotate(original.addToY(radius), rot, wc.center)
-        val to = CalcUtil.rotate(original.addToY(radius + lineLength), rot, wc.center)
-        getResult(from, to)
+        val to = CalcUtil.rotate(original.addToY(radius + CONN_MARK_SIZE), rot, wc.center)
+        Set(Line(from, to))
       } else { Set.empty }
     }
   }
@@ -426,12 +388,5 @@ object DrawUtil {
     //This method is using polyline instead of line to allow better manipulation of the resulting SVG
     //g2d.drawLine(s.x, s.y, e.x, e.y)
     g2d.drawPolyline(List(s.x, e.x).toArray, List(s.y, e.y).toArray.toArray, 2)
-  }
-
-  private def drawPoint(g2d: Graphics2D, pos: Coord, color: Color): Unit = {
-    val oldColor = g2d.getPaint
-    g2d.setPaint(color)
-    g2d.fill(new Ellipse2D.Double(pos.x - 2D, pos.y - 2D, 4D, 4D))
-    g2d.setPaint(oldColor)
   }
 }

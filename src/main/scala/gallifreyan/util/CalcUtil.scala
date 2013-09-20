@@ -6,20 +6,18 @@ import gallifreyan.engine.characters.Consonant
 import gallifreyan.engine.CircleType
 
 object CalcUtil {
-  //TODO move to Coord
   def calcDistance(c1: Coord, c2: Coord): Double = {
     val dx = c1.x - c2.x
     val dy = c1.y - c2.y
     Math.sqrt(Math.pow(dx.abs, 2D) + Math.pow(dy.abs, 2D))
   }
 
-  //TODO move to Circle
   def calcStartAndEnd(c1: Circle, c2: Circle): (Coord, Coord) = {
     calcStartAndEnd(c1.center, c1.radius, c2.center, c2.radius)
   }
 
   //http://mathworld.wolfram.com/Circle-CircleIntersection.html
-  def calcStartAndEnd(c1: Coord, r1: Double, c2: Coord, r2: Double): (Coord, Coord) = {
+  private def calcStartAndEnd(c1: Coord, r1: Double, c2: Coord, r2: Double): (Coord, Coord) = {
     val dist = calcDistance(c1, c2)
     def calcX(): Double = {
       (Math.pow(dist, 2D) - Math.pow(r2, 2D) + Math.pow(r1, 2D)) / (dist * 2D)
@@ -40,12 +38,10 @@ object CalcUtil {
     (first, second)
   }
 
-  //TODO move to Coord
   def calcAngle(source: Coord, target: Coord): Int = {
     Math.toDegrees(Math.atan2(target.y - source.y, target.x - source.x)).intValue
   }
 
-  //TODO move to circle
   //http://mathworld.wolfram.com/CirclePacking.html
   def calcSizeRatio(size: Double): Double = {
     size match {
@@ -60,14 +56,12 @@ object CalcUtil {
     }
   }
 
-  //TODO move to Circle
   def calcLineEnd(circle: Circle, angle: Double, offset: Int): Coord = {
     val x = circle.center.x - (Math.sin(angle) * circle.radius).intValue
     val y = circle.center.y - (Math.cos(angle) * circle.radius).intValue - offset
     Coord(x, y)
   }
 
-  //TODO move to Circle
   def calcOffsetAndSize(circle: Circle, con: Consonant): (Double, Int) = {
     val isOpenOrFull = con.circleType.equals(CircleType.OPEN) || con.circleType.equals(CircleType.FULL)
     val offset = if (isOpenOrFull) { Math.toRadians(-60D) } else { Math.toRadians(-30D) }
@@ -75,7 +69,6 @@ object CalcUtil {
     (offset, size)
   }
 
-  //TODO move to Circle
   def calcDot(circle: Circle, angle: Double): Coord = {
     val distanceToCenter = circle.radius * 0.85D
     val x = circle.center.x - (Math.sin(angle) * distanceToCenter).intValue
@@ -98,7 +91,7 @@ object CalcUtil {
     val yDiff: Int = end.y - start.y
     val xDiffC: Int = circle.center.x - start.x
     val yDiffC: Int = circle.center.y - start.y
-    val div: Int = (xDiff * xDiff) + (yDiff * yDiff)
+    val div: Double = (xDiff * xDiff) + (yDiff * yDiff)
     val foo: Double = ((xDiff * xDiffC) + (yDiff * yDiffC)) / div
     val sub: Double = ((xDiffC * xDiffC) + (yDiffC * yDiffC) - (circle.radius * circle.radius)) / div
     val disc: Double = (foo * foo) - sub
