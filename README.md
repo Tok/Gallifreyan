@@ -28,13 +28,14 @@ This application is running on OpenShift at: http://gallifreyan-9000.rhcloud.com
 
 * Calculate and draw direct line connections
 * Improve code quality and reduce redundancies
+* Prevent error on double spaces
 
 ##### Medium Priority
 
 * Allow manual line connections
 * Consider to draw syllables near the center for words with more than six syllables
 * Allow manual separation of vowels from syllables
-* Improve SVG output by using and better orders
+* Improve SVG output by using groups and better orders
 * Add SVG metadata
 
 ##### Low Priority

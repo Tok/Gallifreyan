@@ -20,4 +20,5 @@ object Sentence {
     val radius = (center.y * 0.9D).intValue
     Circle(center, radius)
   }
+  def outer(lineWidth: Int): Circle = circle.addToRadius(lineWidth * 7)
 }
