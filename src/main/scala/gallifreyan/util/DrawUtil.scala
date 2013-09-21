@@ -3,10 +3,15 @@ package gallifreyan.util
 import java.awt.BasicStroke
 import java.awt.Color
 import java.awt.Font
-import java.awt.Graphics2D
 import java.awt.Polygon
+import java.awt.Shape
 import java.awt.geom.Arc2D
 import java.awt.geom.Ellipse2D
+
+import scala.collection.immutable.TreeSet
+
+import org.apache.batik.svggen.SVGGraphics2D
+
 import gallifreyan.Size
 import gallifreyan.engine.CircleType
 import gallifreyan.engine.MarkType
@@ -21,11 +26,6 @@ import gallifreyan.engine.data.Character
 import gallifreyan.engine.data.Sentence
 import gallifreyan.engine.data.Syllable
 import gallifreyan.engine.data.Word
-import java.awt.Shape
-import java.awt.Rectangle
-import java.awt.Polygon
-import scala.collection.immutable.TreeSet
-import scala.util.Random
 
 object DrawUtil {
   val LINE_WIDTH = 2
@@ -36,7 +36,7 @@ object DrawUtil {
 
   type LineSets = List[Set[Line]]
 
-  def drawSentence(g2d: Graphics2D, sentence: Sentence, fg: Color, bg: Color, addText: Boolean, stubs: Boolean): Unit = {
+  def drawSentence(g2d: SVGGraphics2D, sentence: Sentence, fg: Color, bg: Color, addText: Boolean, stubs: Boolean): Unit = {
     //g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
     //g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY)
     g2d.setPaint(fg)
@@ -64,7 +64,7 @@ object DrawUtil {
     g2d.dispose
   }
 
-  private def connectLinesToCircle(g2d: Graphics2D, connectorLines: List[Line], sentence: Sentence): Unit = {
+  private def connectLinesToCircle(g2d: SVGGraphics2D, connectorLines: List[Line], sentence: Sentence): Unit = {
     def circle: Circle = if (sentence.isSingleWord) { Word.outer(LINE_WIDTH) } else { Sentence.outer(LINE_WIDTH) }
     def calcInter(line: Line): Coord = CalcUtil.calcIntersection(line.start, line.end, circle)
     def draw(start: Coord, end: Coord): Unit = {
@@ -83,7 +83,7 @@ object DrawUtil {
    * 3. connect the closest pairs and make sure that every connector is only connected once
    * 4. return the lines that have not been connected
    */
-  private def connectLines(g2d: Graphics2D, connectorLines: LineSets): List[Line] = {
+  private def connectLines(g2d: SVGGraphics2D, connectorLines: LineSets): List[Line] = {
     val orb = 20
     val cent = Sentence.circle.center
     def pointToEachother(first: Int, second: Int): Boolean = {
@@ -112,19 +112,19 @@ object DrawUtil {
     connectorLines.flatten.filterNot(l => connected.contains(l.start) || connected.contains(l.end))
   }
 
-  private def markStubs(g2d: Graphics2D, lineSets: LineSets): Unit = {
+  private def markStubs(g2d: SVGGraphics2D, lineSets: LineSets): Unit = {
     lineSets.map(_.toList).flatten.foreach(l => drawLine(g2d, l.start, l.end))
   }
 
   @deprecated("Use Shape types", "2013-09-21")
-  private def drawSingleWord(g2d: Graphics2D, word: Word): LineSets = {
+  private def drawSingleWord(g2d: SVGGraphics2D, word: Word): LineSets = {
     drawCircle(g2d, Word.circle)
     val wordSizeRatio = CalcUtil.calcSizeRatio(word.v.size)
     word.zipRots.map(z => drawSyllable(g2d, z._1, z._2, wordSizeRatio, Word.circle))
   }
 
   @deprecated("Use Shape types", "2013-09-21")
-  private def drawWord(g2d: Graphics2D, word: Word, sentRot: Double, sentRatio: Double): LineSets = {
+  private def drawWord(g2d: SVGGraphics2D, word: Word, sentRot: Double, sentRatio: Double): LineSets = {
     def wc: Circle = {
       val sc = Sentence.circle
       val offset = (sc.radius * 0.6D).intValue
@@ -137,10 +137,10 @@ object DrawUtil {
     word.zipRots.map(z => drawSyllable(g2d, z._1, z._2, wordSizeRatio, wc))
   }
 
-  private def writeText(g2d: Graphics2D, sentence: Sentence): Unit = g2d.drawString(sentence.mkString, 10, FONT.getSize)
+  private def writeText(g2d: SVGGraphics2D, sentence: Sentence): Unit = g2d.drawString(sentence.mkString, 10F, FONT.getSize.floatValue)
 
   @deprecated("Use Shape types", "2013-09-21")
-  private def drawSentence(g2d: Graphics2D, sentence: Sentence): Unit = {
+  private def drawSentence(g2d: SVGGraphics2D, sentence: Sentence): Unit = {
     val divCircle = Sentence.circle.addToRadius((Sentence.circle.radius * 0.5D).intValue)
     def drawDivot(angle: Double, op: Option[Punctation]): Unit = {
       val center = Coord(divCircle.center.x, divCircle.center.y + divCircle.radius)
@@ -174,7 +174,7 @@ object DrawUtil {
   }
 
   @deprecated("Use Shape types", "2013-09-21")
-  private def drawSyllable(g2d: Graphics2D, syl: Syllable, rot: Double, sizeRatio: Double, wc: Circle): Set[Line] = {
+  private def drawSyllable(g2d: SVGGraphics2D, syl: Syllable, rot: Double, sizeRatio: Double, wc: Circle): Set[Line] = {
     def isDouble(i: Int, syl: Syllable): Boolean = i > 0 && syl.v(i) == syl.v(i - 1) //TODO don't access list by index
     val lastCon = syl.v.head match {
       case con: Consonant => Some(con)
@@ -186,7 +186,7 @@ object DrawUtil {
   }
 
   @deprecated("Use Shape types", "2013-09-21")
-  private def drawCharacter(g2d: Graphics2D, c: Character, sylCircle: Circle, lastCon: Option[Consonant],
+  private def drawCharacter(g2d: SVGGraphics2D, c: Character, sylCircle: Circle, lastCon: Option[Consonant],
     isDouble: Boolean, sizeRatio: Double, rot: Double, wc: Circle): Set[Line] = {
     c match {
       case con: Consonant => drawConsonant(g2d, con, isDouble, sizeRatio, -rot, wc)
@@ -196,7 +196,7 @@ object DrawUtil {
   }
 
   @deprecated("Use Shape types", "2013-09-21")
-  private def drawConsonant(g2d: Graphics2D, con: Consonant, isDouble: Boolean, sizeRatio: Double,
+  private def drawConsonant(g2d: SVGGraphics2D, con: Consonant, isDouble: Boolean, sizeRatio: Double,
     rot: Double, wc: Circle): Set[Line] = {
     val original = GenerationUtil.makeConCircle(con, wc, isDouble, sizeRatio)
     def connCircle: Circle = original.addToRadius(CONN_MARK_SIZE)
@@ -255,7 +255,7 @@ object DrawUtil {
   }
 
   @deprecated("Use Shape types", "2013-09-21")
-  private def drawVowel(g2d: Graphics2D, vow: Vowel, sylCircle: Circle, lastCon: Option[Consonant],
+  private def drawVowel(g2d: SVGGraphics2D, vow: Vowel, sylCircle: Circle, lastCon: Option[Consonant],
     isDouble: Boolean, rot: Double, wc: Circle): Set[Line] = {
     def offset: Int = (sylCircle.radius * vow.position.offset).intValue
     def halfOff: Int = offset / 2
@@ -299,7 +299,7 @@ object DrawUtil {
   }
 
   @deprecated("Use Shape types", "2013-09-21")
-  private def drawPunctation(g2d: Graphics2D, pun: Punctation, cir: Circle, outer: Circle): Unit = {
+  private def drawPunctation(g2d: SVGGraphics2D, pun: Punctation, cir: Circle, outer: Circle): Unit = {
     def close: Coord = cir.calcClosestTo(Sentence.circle.center)
     pun match {
       case Punctation.DOT =>
@@ -339,12 +339,12 @@ object DrawUtil {
     }
   }
 
-  private def drawConsonantPoint(g2d: Graphics2D, pos: Coord, size: Int): Unit = {
+  private def drawConsonantPoint(g2d: SVGGraphics2D, pos: Coord, size: Int): Unit = {
     val doubleSize = size * 2
     g2d.fill(new Ellipse2D.Double(pos.x - size, pos.y - size, doubleSize, doubleSize))
   }
 
-  private def fillRect(g2d: Graphics2D, center: Coord, p1: Coord, p2: Coord): Unit = {
+  private def fillRect(g2d: SVGGraphics2D, center: Coord, p1: Coord, p2: Coord): Unit = {
     val p3 = CalcUtil.rotate(p1, 180D, center)
     val p4 = CalcUtil.rotate(p2, 180D, center)
     val x: Array[Int] = Array(p1.x, p2.x, p3.x, p4.x)
@@ -353,7 +353,7 @@ object DrawUtil {
     drawOrFill(g2d, triangle, true)
   }
 
-  private def drawArc(g2d: Graphics2D, circle: Circle, s: Coord, e: Coord): Unit = {
+  private def drawArc(g2d: SVGGraphics2D, circle: Circle, s: Coord, e: Coord): Unit = {
     val arc = new Arc2D.Double(Arc2D.OPEN)
     arc.setFrame(circle.xStart, circle.yStart, circle.diameter, circle.diameter)
     arc.setAngles(s.x, s.y, e.x, e.y)
@@ -361,14 +361,14 @@ object DrawUtil {
     drawOrFill(g2d, arc, false)
   }
 
-  private def fillCircle(g2d: Graphics2D, circle: Circle): Unit = drawOrFillCircle(g2d, circle, true)
-  private def drawCircle(g2d: Graphics2D, circle: Circle): Unit = drawOrFillCircle(g2d, circle, false)
-  private def drawOrFillCircle(g2d: Graphics2D, circle: Circle, fill: Boolean): Unit = {
+  private def fillCircle(g2d: SVGGraphics2D, circle: Circle): Unit = drawOrFillCircle(g2d, circle, true)
+  private def drawCircle(g2d: SVGGraphics2D, circle: Circle): Unit = drawOrFillCircle(g2d, circle, false)
+  private def drawOrFillCircle(g2d: SVGGraphics2D, circle: Circle, fill: Boolean): Unit = {
     val ellipse = new Ellipse2D.Double(circle.xStart, circle.yStart, circle.diameter, circle.diameter)
     drawOrFill(g2d, ellipse, fill)
   }
 
-  private def drawOrFill(g2d: Graphics2D, shape: Shape, fill: Boolean): Unit = {
+  private def drawOrFill(g2d: SVGGraphics2D, shape: Shape, fill: Boolean): Unit = {
     if (!fill) { g2d.draw(shape) } else {
       val oldColor = g2d.getPaint
       g2d.setPaint(g2d.getBackground)
@@ -377,7 +377,7 @@ object DrawUtil {
     }
   }
 
-  private def drawLine(g2d: Graphics2D, s: Coord, e: Coord): Unit = {
+  private def drawLine(g2d: SVGGraphics2D, s: Coord, e: Coord): Unit = {
     //This method is using polyline instead of line to allow better manipulation of the resulting SVG
     //g2d.drawLine(s.x, s.y, e.x, e.y)
     g2d.drawPolyline(List(s.x, e.x).toArray, List(s.y, e.y).toArray.toArray, 2)

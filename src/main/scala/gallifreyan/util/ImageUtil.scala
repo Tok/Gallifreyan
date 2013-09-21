@@ -44,7 +44,7 @@ object ImageUtil {
   }
 
   class Generate(val sentence: Sentence, val fg: Color, val bg: Color, val addText: Boolean, val stubs: Boolean) {
-    def paint(g2d: Graphics2D): Unit = DrawUtil.drawSentence(g2d, sentence, fg, bg, addText, stubs)
+    def paint(g2d: SVGGraphics2D): Unit = DrawUtil.drawSentence(g2d, sentence, fg, bg, addText, stubs)
   }
 
   def makePngFromSvg(svgBytes: Array[Byte]): StreamSource = {
