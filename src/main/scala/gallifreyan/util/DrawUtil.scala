@@ -137,23 +137,10 @@ object DrawUtil {
 
   private def makeSylCircle(syl: Syllable, sizeRatio: Double, wordCircle: Circle): Circle = {
     syl.v(0) match {
-      case con: Consonant => makeConCircle(con, wordCircle, false, sizeRatio)
-      case _ => makeConCircle(Consonant.TH, wordCircle, false, sizeRatio)
+      case con: Consonant => GenerationUtil.makeConCircle(con, wordCircle, false, sizeRatio)
+      case _ => GenerationUtil.makeConCircle(Consonant.TH, wordCircle, false, sizeRatio)
       //Vowels in syllables without constants use the same circle as Th
     }
-  }
-
-  private def makeConCircle(con: Consonant, wordCircle: Circle, isDouble: Boolean, sizeRatio: Double): Circle = {
-    val offset = (wordCircle.radius * con.circleType.offset).intValue
-    val rat = if (isDouble) { con.circleType.doubleRatio } else { con.circleType.ratio }
-    val radius = (wordCircle.radius * rat).intValue
-    val fixedRadius = (radius * sizeRatio).intValue
-    val fixedCenter = if (con.circleType.equals(CircleType.STRIKED)) {
-      wordCircle.center.addToY(wordCircle.radius)
-    } else {
-      wordCircle.center.addToY(offset).addToY(radius - (fixedRadius))
-    }
-    Circle(fixedCenter, fixedRadius)
   }
 
   private def writeText(g2d: Graphics2D, sentence: Sentence): Unit = g2d.drawString(sentence.mkString, 10, FONT.getSize)
@@ -191,6 +178,7 @@ object DrawUtil {
     }
   }
 
+  @deprecated("Use Shape types", "2013-09-21")
   private def drawPunctation(g2d: Graphics2D, pun: Punctation, cir: Circle, outer: Circle): Unit = {
     def close: Coord = cir.calcClosestTo(Sentence.circle.center)
     pun match {
@@ -242,6 +230,7 @@ object DrawUtil {
     connectors.flatten.toSet
   }
 
+  @deprecated("Use Shape types", "2013-09-21")
   private def drawCharacter(g2d: Graphics2D, c: Character, sylCircle: Circle, lastCon: Option[Consonant],
     isDouble: Boolean, sizeRatio: Double, rot: Double, wc: Circle): Set[Line] = {
     c match {
@@ -251,9 +240,10 @@ object DrawUtil {
     }
   }
 
+  @deprecated("Use Shape types", "2013-09-21")
   private def drawConsonant(g2d: Graphics2D, con: Consonant, isDouble: Boolean, sizeRatio: Double,
     rot: Double, wc: Circle): Set[Line] = {
-    val original = makeConCircle(con, wc, isDouble, sizeRatio)
+    val original = GenerationUtil.makeConCircle(con, wc, isDouble, sizeRatio)
     def connCircle: Circle = original.addToRadius(CONN_MARK_SIZE)
     val circle = Circle(CalcUtil.rotate(original.center, rot, wc.center), original.radius)
     if (!con.circleType.isCrossing) { drawCircle(g2d, circle) }
@@ -309,6 +299,7 @@ object DrawUtil {
     }
   }
 
+  @deprecated("Use Shape types", "2013-09-21")
   private def drawVowel(g2d: Graphics2D, vow: Vowel, sylCircle: Circle, lastCon: Option[Consonant],
     isDouble: Boolean, rot: Double, wc: Circle): Set[Line] = {
     def offset: Int = (sylCircle.radius * vow.position.offset).intValue
