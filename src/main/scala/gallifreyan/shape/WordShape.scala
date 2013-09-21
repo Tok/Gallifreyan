@@ -6,4 +6,4 @@ import gallifreyan.shape.parts.Lines
 import gallifreyan.engine.cases.Circle
 import gallifreyan.engine.characters.Punctation
 
-case class WordShape(val circle: Circle, val syllables: List[SyllableShape], val punctation: Option[Punctation])
+case class WordShape(val circle: Option[Circle], val syllables: List[SyllableShape], val punctation: Option[PunctationShape])

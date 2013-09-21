@@ -116,12 +116,14 @@ object DrawUtil {
     lineSets.map(_.toList).flatten.foreach(l => drawLine(g2d, l.start, l.end))
   }
 
+  @deprecated("Use Shape types", "2013-09-21")
   private def drawSingleWord(g2d: Graphics2D, word: Word): LineSets = {
     drawCircle(g2d, Word.circle)
     val wordSizeRatio = CalcUtil.calcSizeRatio(word.v.size)
     word.zipRots.map(z => drawSyllable(g2d, z._1, z._2, wordSizeRatio, Word.circle))
   }
 
+  @deprecated("Use Shape types", "2013-09-21")
   private def drawWord(g2d: Graphics2D, word: Word, sentRot: Double, sentRatio: Double): LineSets = {
     def wc: Circle = {
       val sc = Sentence.circle
@@ -135,16 +137,9 @@ object DrawUtil {
     word.zipRots.map(z => drawSyllable(g2d, z._1, z._2, wordSizeRatio, wc))
   }
 
-  private def makeSylCircle(syl: Syllable, sizeRatio: Double, wordCircle: Circle): Circle = {
-    syl.v(0) match {
-      case con: Consonant => GenerationUtil.makeConCircle(con, wordCircle, false, sizeRatio)
-      case _ => GenerationUtil.makeConCircle(Consonant.TH, wordCircle, false, sizeRatio)
-      //Vowels in syllables without constants use the same circle as Th
-    }
-  }
-
   private def writeText(g2d: Graphics2D, sentence: Sentence): Unit = g2d.drawString(sentence.mkString, 10, FONT.getSize)
 
+  @deprecated("Use Shape types", "2013-09-21")
   private def drawSentence(g2d: Graphics2D, sentence: Sentence): Unit = {
     val divCircle = Sentence.circle.addToRadius((Sentence.circle.radius * 0.5D).intValue)
     def drawDivot(angle: Double, op: Option[Punctation]): Unit = {
@@ -179,53 +174,13 @@ object DrawUtil {
   }
 
   @deprecated("Use Shape types", "2013-09-21")
-  private def drawPunctation(g2d: Graphics2D, pun: Punctation, cir: Circle, outer: Circle): Unit = {
-    def close: Coord = cir.calcClosestTo(Sentence.circle.center)
-    pun match {
-      case Punctation.DOT =>
-        drawCircle(g2d, Circle(close, 20))
-      case Punctation.QUESTION =>
-        val first = CalcUtil.rotate(cir.moveFromCenter(close, 0.9D), -10D, cir.center)
-        val second = CalcUtil.rotate(cir.moveFromCenter(close, 0.9D), 10D, cir.center)
-        drawConsonantPoint(g2d, first, 5)
-        drawConsonantPoint(g2d, second, 5)
-      case Punctation.EXCLAIM =>
-        val first = CalcUtil.rotate(cir.moveFromCenter(close, 0.9D), -15D, cir.center)
-        val middle = cir.moveFromCenter(close, 0.9D)
-        val second = CalcUtil.rotate(cir.moveFromCenter(close, 0.9D), 15D, cir.center)
-        drawConsonantPoint(g2d, first, 5)
-        drawConsonantPoint(g2d, middle, 5)
-        drawConsonantPoint(g2d, second, 5)
-      case Punctation.DOUBLEQUOTE =>
-        drawLine(g2d, close, outer.calcClosestTo(close))
-      case Punctation.QUOTE =>
-        val first = CalcUtil.rotate(close, -10D, cir.center)
-        val second = CalcUtil.rotate(close, 10D, cir.center)
-        drawLine(g2d, first, CalcUtil.rotate(outer.calcClosestTo(close), 10D, outer.center))
-        drawLine(g2d, second, CalcUtil.rotate(outer.calcClosestTo(close), -10D, outer.center))
-      case Punctation.HYPHEN =>
-        val first = CalcUtil.rotate(close, -15D, cir.center)
-        val second = CalcUtil.rotate(close, 15D, cir.center)
-        drawLine(g2d, first, CalcUtil.rotate(outer.calcClosestTo(close), 10D, outer.center))
-        drawLine(g2d, close, outer.calcClosestTo(close))
-        drawLine(g2d, second, CalcUtil.rotate(outer.calcClosestTo(close), -10D, outer.center))
-      case Punctation.COMMA =>
-        drawConsonantPoint(g2d, close, 20)
-      case Punctation.SEMICOLON =>
-        drawConsonantPoint(g2d, cir.moveFromCenter(close, 0.9D), 5)
-      case Punctation.COLON =>
-        drawCircle(g2d, Circle(close, 20))
-        drawCircle(g2d, Circle(close, 16))
-    }
-  }
-
   private def drawSyllable(g2d: Graphics2D, syl: Syllable, rot: Double, sizeRatio: Double, wc: Circle): Set[Line] = {
     def isDouble(i: Int, syl: Syllable): Boolean = i > 0 && syl.v(i) == syl.v(i - 1) //TODO don't access list by index
     val lastCon = syl.v.head match {
       case con: Consonant => Some(con)
       case _ => None
     }
-    val sylCircle = makeSylCircle(syl, sizeRatio, wc)
+    val sylCircle = GenerationUtil.makeSylCircle(syl, sizeRatio, wc)
     val connectors = syl.v.indices.map(i => drawCharacter(g2d, syl.v(i), sylCircle, lastCon, isDouble(i, syl), sizeRatio, rot, wc))
     connectors.flatten.toSet
   }
@@ -340,6 +295,47 @@ object DrawUtil {
         val to = CalcUtil.rotate(original.addToY(radius + CONN_MARK_SIZE), rot, wc.center)
         Set(Line(from, to))
       } else { Set.empty }
+    }
+  }
+
+  @deprecated("Use Shape types", "2013-09-21")
+  private def drawPunctation(g2d: Graphics2D, pun: Punctation, cir: Circle, outer: Circle): Unit = {
+    def close: Coord = cir.calcClosestTo(Sentence.circle.center)
+    pun match {
+      case Punctation.DOT =>
+        drawCircle(g2d, Circle(close, 20))
+      case Punctation.QUESTION =>
+        val first = CalcUtil.rotate(cir.moveFromCenter(close, 0.9D), -10D, cir.center)
+        val second = CalcUtil.rotate(cir.moveFromCenter(close, 0.9D), 10D, cir.center)
+        drawConsonantPoint(g2d, first, 5)
+        drawConsonantPoint(g2d, second, 5)
+      case Punctation.EXCLAIM =>
+        val first = CalcUtil.rotate(cir.moveFromCenter(close, 0.9D), -15D, cir.center)
+        val middle = cir.moveFromCenter(close, 0.9D)
+        val second = CalcUtil.rotate(cir.moveFromCenter(close, 0.9D), 15D, cir.center)
+        drawConsonantPoint(g2d, first, 5)
+        drawConsonantPoint(g2d, middle, 5)
+        drawConsonantPoint(g2d, second, 5)
+      case Punctation.DOUBLEQUOTE =>
+        drawLine(g2d, close, outer.calcClosestTo(close))
+      case Punctation.QUOTE =>
+        val first = CalcUtil.rotate(close, -10D, cir.center)
+        val second = CalcUtil.rotate(close, 10D, cir.center)
+        drawLine(g2d, first, CalcUtil.rotate(outer.calcClosestTo(close), 10D, outer.center))
+        drawLine(g2d, second, CalcUtil.rotate(outer.calcClosestTo(close), -10D, outer.center))
+      case Punctation.HYPHEN =>
+        val first = CalcUtil.rotate(close, -15D, cir.center)
+        val second = CalcUtil.rotate(close, 15D, cir.center)
+        drawLine(g2d, first, CalcUtil.rotate(outer.calcClosestTo(close), 10D, outer.center))
+        drawLine(g2d, close, outer.calcClosestTo(close))
+        drawLine(g2d, second, CalcUtil.rotate(outer.calcClosestTo(close), -10D, outer.center))
+      case Punctation.COMMA =>
+        drawConsonantPoint(g2d, close, 20)
+      case Punctation.SEMICOLON =>
+        drawConsonantPoint(g2d, cir.moveFromCenter(close, 0.9D), 5)
+      case Punctation.COLON =>
+        drawCircle(g2d, Circle(close, 20))
+        drawCircle(g2d, Circle(close, 16))
     }
   }
 
