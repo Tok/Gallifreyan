@@ -65,9 +65,16 @@ object DrawUtil {
   }
 
   private def connectLinesToCircle(g2d: Graphics2D, connectorLines: List[Line], sentence: Sentence): Unit = {
-    def selectCircle: Circle = if (sentence.isSingleWord) { Word.outer(LINE_WIDTH) } else { Sentence.outer(LINE_WIDTH) }
-    def calcInter(line: Line): Coord = CalcUtil.calcIntersection(line.start, line.end, selectCircle)
-    connectorLines.foreach(line => drawLine(g2d, line.start, calcInter(line)))
+    def circle: Circle = if (sentence.isSingleWord) { Word.outer(LINE_WIDTH) } else { Sentence.outer(LINE_WIDTH) }
+    def calcInter(line: Line): Coord = CalcUtil.calcIntersection(line.start, line.end, circle)
+    def draw(start: Coord, end: Coord): Unit = {
+      if (!sentence.isSingleWord || CalcUtil.calcDistance(start, circle.calcClosestTo(start)) < CalcUtil.calcDistance(end, circle.calcClosestTo(start))) {
+        drawLine(g2d, start, end)
+      } else {
+        drawLine(g2d, start, circle.moveFromCenter(start, 1.2D))
+      }
+    }
+    connectorLines.foreach(line => draw(line.start, calcInter(line)))
   }
 
   /**
