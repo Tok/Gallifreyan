@@ -1,37 +1,43 @@
 package gallifreyan.util
 
-import gallifreyan.engine.cases.Circle
-import gallifreyan.engine.characters.Vowel
-import gallifreyan.engine.characters.Consonant
+import scala.annotation.tailrec
+
+import gallifreyan.Size
 import gallifreyan.engine.CircleType
-import gallifreyan.engine.VowelPosition
-import gallifreyan.engine.cases.Line
-import gallifreyan.shape.VowelShape
-import gallifreyan.shape.parts.Circles
-import gallifreyan.shape.ConsonantShape
 import gallifreyan.engine.MarkType
-import gallifreyan.shape.parts.Round
-import gallifreyan.shape.parts.Arcs
+import gallifreyan.engine.VowelPosition
 import gallifreyan.engine.cases.Arc
-import gallifreyan.shape.parts.Lines
-import gallifreyan.shape.parts.Dots
+import gallifreyan.engine.cases.Circle
 import gallifreyan.engine.cases.Coord
+import gallifreyan.engine.cases.Line
+import gallifreyan.engine.characters.Consonant
 import gallifreyan.engine.characters.Punctation
+import gallifreyan.engine.characters.Vowel
 import gallifreyan.engine.data.Sentence
-import gallifreyan.shape.PunctationShape
 import gallifreyan.engine.data.Syllable
-import gallifreyan.shape.parts.Arcs
-import gallifreyan.shape.SyllableShape
-import gallifreyan.shape.WordShape
 import gallifreyan.engine.data.Word
+import gallifreyan.shape.ConsonantShape
+import gallifreyan.shape.PunctationShape
 import gallifreyan.shape.SentenceShape
+import gallifreyan.shape.SyllableShape
+import gallifreyan.shape.VowelShape
+import gallifreyan.shape.WordShape
+import gallifreyan.shape.parts.ArcCircle
+import gallifreyan.shape.parts.Arcs
+import gallifreyan.shape.parts.Circles
+import gallifreyan.shape.parts.Dots
+import gallifreyan.shape.parts.Lines
+import gallifreyan.shape.parts.Round
 
 object GenerationUtil {
-  val LINE_WIDTH = 2
-  val HALF_LINE = LINE_WIDTH / 2
   val CONN_MARK_SIZE = 20
 
   def generateSentence(sentence: Sentence): SentenceShape = {
+    if (!sentence.isSingleWord) { generateSentenceFromWords(sentence) }
+    else { generateSentenceFromSingleWord(sentence.v.head) }
+  }
+
+  private def generateSentenceFromWords(sentence: Sentence): SentenceShape = {
     val originalDivotCircle = Sentence.circle.addToRadius((Sentence.circle.radius * 0.5D).intValue)
     val center = Coord(originalDivotCircle.center.x, originalDivotCircle.center.y + originalDivotCircle.radius)
     val radius = Sentence.circle.radius * CalcUtil.calcSizeRatio(sentence.v.size + 1)
@@ -45,29 +51,36 @@ object GenerationUtil {
     }
     val divots: Map[Double, Arc] = {
       val angle = sentence.rots(1) / 2
-      val angles = sentence.rots.map(r => (r * -1) - angle)
-      angles.map(a => (a, generateDivot(a))).toMap
+      val angles = sentence.rots.map(r => (r, (r * -1) - angle))
+      angles.map(tup => (tup._1, generateDivot(tup._2))).toMap
     }
-    val sentSizeRatio = CalcUtil.calcSizeRatio(sentence.v.size)
     def getRotated(angle: Double): Circle = divots.get(angle).get.circle
-    val outer = Sentence.outer(LINE_WIDTH)
-    val words = sentence.zipRots.map(z => generateWord(z._1, z._2, sentSizeRatio, getRotated(z._2), outer))
-    SentenceShape(Sentence.circle, Sentence.outer(LINE_WIDTH), words, Some(divots.values.toList))
+    val outer = Sentence.outer(Size.lineWidth)
+
+    val sentSizeRatio = CalcUtil.calcSizeRatio(sentence.v.size)
+    val offset = (Sentence.circle.radius * 0.6D).intValue
+    val rad = (Sentence.circle.radius * 0.35D * sentSizeRatio).intValue
+
+    val words = sentence.zipRots.map(z => generateWord(z._1, z._2, offset, rad, getRotated(z._2), outer))
+    val arcs = divots.values.toList.map(a => Arc(Sentence.circle, a.start, a.end))
+    val switched = switchEndpoints(arcs)
+    val arcCircle = ArcCircle(Sentence.circle, switched.map(_.start), switched.map(_.end))
+    SentenceShape(Some(arcCircle), Sentence.outer(Size.lineWidth), words, Some(divots.values.toList))
   }
 
-  def generateSentenceFromSingleWord(word: Word): SentenceShape = {
-    val wordSizeRatio = CalcUtil.calcSizeRatio(word.v.size)
-    val syllables = word.zipRots.map(z => generateSyllable(z._1, z._2, wordSizeRatio, Word.circle))
-    val wordShape = WordShape(None, syllables, None)    
-    SentenceShape(Word.circle, Word.outer(LINE_WIDTH), List(wordShape), None)
+  private def generateSentenceFromSingleWord(word: Word): SentenceShape = {
+    if (word.v.isEmpty) {
+      SentenceShape(None, Word.outer(Size.lineWidth), Nil, None)
+    } else {
+      val sizeRatio = CalcUtil.calcSizeRatio(word.v.size)
+      val wordShape = generateWord(word, 0D, 0, Word.circle.radius, Word.circle, Word.outer(Size.lineWidth))
+      SentenceShape(None, Word.outer(Size.lineWidth), List(wordShape), None)      
+    }
   }
 
-  private def generateWord(word: Word, sentRot: Double, sentRatio: Double, divCirc: Circle, outer: Circle): WordShape = {
+  private def generateWord(word: Word, sentRot: Double, offset: Int, radius: Int, divCirc: Circle, outer: Circle): WordShape = {
     def wc: Circle = {
-      val sc = Sentence.circle
-      val offset = (sc.radius * 0.6D).intValue
-      val radius = (sc.radius * 0.35D * sentRatio).intValue
-      val center = CalcUtil.rotate(sc.center.addToY(offset), -sentRot, sc.center)
+      val center = CalcUtil.rotate(Sentence.circle.center.addToY(offset), -sentRot, Sentence.circle.center)
       Circle(center, radius)
     }
     val wordSizeRatio = CalcUtil.calcSizeRatio(word.v.size)
@@ -79,7 +92,17 @@ object GenerationUtil {
         Some(generatePunctation(pun, divCirc, outer))
       }
     }
-    WordShape(Some(wc), syllables, punctation)
+    def getStartAndEnd(co: Option[ConsonantShape]): Option[(Coord, Coord)] = {
+      if (co.isDefined && co.get.round.isInstanceOf[Arcs]) {
+        val arcs = co.get.round.asInstanceOf[Arcs]
+        Some(arcs.inner.start, arcs.inner.end)
+      } else { None }
+    }
+    val points = syllables.map(s => getStartAndEnd(s.consonant))
+    val arcs = points.filter(_.isDefined).map(_.get).map(tup => Arc(wc, tup._1, tup._2))
+    val switched = switchEndpoints(arcs)
+    val arcCircle = ArcCircle(wc, switched.map(_.start), switched.map(_.end))
+    WordShape(Some(arcCircle), syllables, punctation)
   }
 
   private def generateSyllable(syl: Syllable, rot: Double, sizeRatio: Double, wc: Circle): SyllableShape = {
@@ -123,34 +146,28 @@ object GenerationUtil {
         val rotEd = CalcUtil.rotate(eD, rot, wc.center)
         val rotSd = CalcUtil.rotate(sD, rot, wc.center)
         Arcs(inner, Some(Arc(outer.get, rotEd, rotSd)))
-      } else {
-        //con.circleType match {
-        //  case CircleType.HALF => fillRect(g2d, circle.center, rotE, rotS)
-        //  case _ => fillCircle(g2d, circle.addToRadius(-HALF_LINE))
-        //}
-        Arcs(inner, None)
-      }
+      } else { Arcs(inner, None) }
     }
     def da: Double = Math.toRadians(10D)
     def dda: Double = da * 2D
     val lines: Option[Lines] = con.markType match {
       case MarkType.TRIPPLE_LINE =>
-        val leftStart = CalcUtil.rotate(CalcUtil.calcLineEnd(original, dda, HALF_LINE), rot, wc.center)
-        val middleStart = CalcUtil.rotate(CalcUtil.calcLineEnd(original, 0D, HALF_LINE), rot, wc.center)
-        val rightStart = CalcUtil.rotate(CalcUtil.calcLineEnd(original, -dda, HALF_LINE), rot, wc.center)
-        val leftEnd = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, dda, HALF_LINE), rot, wc.center)
-        val middleEnd = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, 0D, HALF_LINE), rot, wc.center)
-        val rightEnd = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, -dda, HALF_LINE), rot, wc.center)
+        val leftStart = CalcUtil.rotate(CalcUtil.calcLineEnd(original, dda, Size.halfLine), rot, wc.center)
+        val middleStart = CalcUtil.rotate(CalcUtil.calcLineEnd(original, 0D, Size.halfLine), rot, wc.center)
+        val rightStart = CalcUtil.rotate(CalcUtil.calcLineEnd(original, -dda, Size.halfLine), rot, wc.center)
+        val leftEnd = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, dda, Size.halfLine), rot, wc.center)
+        val middleEnd = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, 0D, Size.halfLine), rot, wc.center)
+        val rightEnd = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, -dda, Size.halfLine), rot, wc.center)
         Some(Lines(Some(Line(leftStart, leftEnd)), Some(Line(middleStart, middleEnd)), Some(Line(rightStart, rightEnd))))
       case MarkType.LINE =>
-        val start = CalcUtil.rotate(CalcUtil.calcLineEnd(original, 0D, HALF_LINE), rot, wc.center)
-        val end = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, 0D, HALF_LINE), rot, wc.center)
+        val start = CalcUtil.rotate(CalcUtil.calcLineEnd(original, 0D, Size.halfLine), rot, wc.center)
+        val end = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, 0D, Size.halfLine), rot, wc.center)
         Some(Lines(None, Some(Line(start, end)), None))
       case MarkType.DOUBLE_LINE =>
-        val leftStart = CalcUtil.rotate(CalcUtil.calcLineEnd(original, da, HALF_LINE), rot, wc.center)
-        val rightStart = CalcUtil.rotate(CalcUtil.calcLineEnd(original, -da, HALF_LINE), rot, wc.center)
-        val leftEnd = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, da, HALF_LINE), rot, wc.center)
-        val rightEnd = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, -da, HALF_LINE), rot, wc.center)
+        val leftStart = CalcUtil.rotate(CalcUtil.calcLineEnd(original, da, Size.halfLine), rot, wc.center)
+        val rightStart = CalcUtil.rotate(CalcUtil.calcLineEnd(original, -da, Size.halfLine), rot, wc.center)
+        val leftEnd = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, da, Size.halfLine), rot, wc.center)
+        val rightEnd = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, -da, Size.halfLine), rot, wc.center)
         Some(Lines(Some(Line(leftStart, leftEnd)), None, Some(Line(rightStart, rightEnd))))
       case _ => None
     }
@@ -219,11 +236,11 @@ object GenerationUtil {
   }
 
   private def generatePunctation(pun: Punctation, cir: Circle, outer: Circle): PunctationShape = {
-    def dotSize = 5
-    def circleSize = 20
-    def dualAngle = 10
-    def trippleAngle = 15
-    def ratio = 0.9D
+    def dotSize: Int = 5
+    def circleSize: Int = 20
+    def dualAngle: Int = 10
+    def trippleAngle: Int = 15
+    def ratio: Double = 0.9D
     def close: Coord = cir.calcClosestTo(Sentence.circle.center)
     pun match {
       case Punctation.DOT =>
@@ -267,7 +284,31 @@ object GenerationUtil {
     }
   }
 
-  def makeConCircle(con: Consonant, wordCircle: Circle, isDouble: Boolean, sizeRatio: Double): Circle = {
+  def separateLines(sentenceShape: SentenceShape): List[Line] = {
+    val syls: List[SyllableShape] = sentenceShape.words.map(_.syllables).flatten
+    val cons: List[ConsonantShape] = syls.map(_.consonant).filter(_.isDefined).map(_.get)
+    val vows: List[VowelShape] = syls.map(_.vowel).filter(_.isDefined).map(_.get)
+    val conLinesGroups: List[Lines] = cons.map(_.lines).filter(_.isDefined).map(_.get)
+    val lefts: List[Line] = conLinesGroups.map(_.left).filter(_.isDefined).map(_.get)
+    val middles: List[Line] = conLinesGroups.map(_.middle).filter(_.isDefined).map(_.get)
+    val rights: List[Line] = conLinesGroups.map(_.right).filter(_.isDefined).map(_.get)
+    val vowLines: List[Line] = vows.map(_.line).filter(_.isDefined).map(_.get)
+    lefts ::: middles ::: rights ::: vowLines
+  }
+
+  private def switchEndpoints(divots: List[Arc]): List[Arc] = {
+    if(divots.isEmpty) { Nil } else {
+      val first = Arc(Sentence.circle, divots.last.start, divots.head.end)
+      @tailrec
+      def rest(l: List[Arc], accu: List[Arc]): List[Arc] = {
+        if (l.size <= 1) { accu }
+        else { rest(l.tail, accu ::: List(Arc(Sentence.circle, l.head.start, l.tail.head.end))) }
+      }
+      rest(divots, List(first))
+    }
+  }
+
+  private def makeConCircle(con: Consonant, wordCircle: Circle, isDouble: Boolean, sizeRatio: Double): Circle = {
     val offset = (wordCircle.radius * con.circleType.offset).intValue
     val rat = if (isDouble) { con.circleType.doubleRatio } else { con.circleType.ratio }
     val radius = (wordCircle.radius * rat).intValue
@@ -280,7 +321,7 @@ object GenerationUtil {
     Circle(fixedCenter, fixedRadius)
   }
 
-  def makeSylCircle(syl: Syllable, sizeRatio: Double, wordCircle: Circle): Circle = {
+  private def makeSylCircle(syl: Syllable, sizeRatio: Double, wordCircle: Circle): Circle = {
     syl.v(0) match {
       case con: Consonant => GenerationUtil.makeConCircle(con, wordCircle, false, sizeRatio)
       case _ => GenerationUtil.makeConCircle(Consonant.TH, wordCircle, false, sizeRatio)

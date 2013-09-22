@@ -1,9 +1,5 @@
 package gallifreyan.shape
 
-import gallifreyan.shape.parts.Circles
-import gallifreyan.shape.parts.Dots
-import gallifreyan.shape.parts.Lines
-import gallifreyan.engine.cases.Circle
-import gallifreyan.engine.characters.Punctation
+import gallifreyan.shape.parts.ArcCircle
 
-case class WordShape(val circle: Option[Circle], val syllables: List[SyllableShape], val punctation: Option[PunctationShape])
+case class WordShape(val circle: Option[ArcCircle], val syllables: List[SyllableShape], val punctation: Option[PunctationShape])
