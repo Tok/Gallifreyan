@@ -7,11 +7,8 @@ import java.awt.Polygon
 import java.awt.Shape
 import java.awt.geom.Arc2D
 import java.awt.geom.Ellipse2D
-
 import scala.collection.immutable.TreeSet
-
 import org.apache.batik.svggen.SVGGraphics2D
-
 import gallifreyan.Size
 import gallifreyan.engine.cases.Arc
 import gallifreyan.engine.cases.Circle
@@ -36,8 +33,6 @@ object DrawUtil {
   val FONT = new Font(Font.MONOSPACED, Font.BOLD, 30)
 
   def drawSentence(g2d: SVGGraphics2D, sentence: Sentence, fg: Color, bg: Color, addText: Boolean, stubs: Boolean): Unit = {
-    //g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-    //g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY)
     g2d.setPaint(fg)
     g2d.setBackground(bg)
     g2d.setStroke(STROKE)
@@ -49,9 +44,10 @@ object DrawUtil {
       if (stubs) {
         markStubs(g2d, separatedLines)
       } else {
+        connectLinesToCircle(g2d, separatedLines, sentence)
+        //TODO implement
         //val rest = connectLines(g2d, separatedLines)
         //connectLinesToCircle(g2d, rest, sentence)
-        connectLinesToCircle(g2d, separatedLines, sentence)
       }
       if (addText) { writeText(g2d, sentence) }
     }
@@ -137,39 +133,47 @@ object DrawUtil {
     connectorLines.foreach(line => draw(line.start, calcInter(line)))
   }
 
-  /**
-   * 1. filter lines that point towards the center of sentence circle -> list of lines
-   * 2. pair up coords of lines that point towards each other within the tolerance of the defined orb -> list of lines
-   * 3. connect the closest pairs and make sure that every connector is only connected once
-   * 4. return the lines that have not been connected
-   */
   private def connectLines(g2d: SVGGraphics2D, connectorLines: List[Line]): List[Line] = {
+    //FIXME prevent mutli connections
+    //FIXME always connect closest pairs
+    //FIXME prevent striking through unconnected consonants and vowels
     val orb = 20
     val cent = Sentence.circle.center
     def pointToEachother(first: Int, second: Int): Boolean = {
-      val diff = Math.abs(first - second)
-      diff >= -orb && diff <= orb
+      val diff = Math.abs(Math.abs(first) - Math.abs(second))
+      diff >= 180 - orb && diff <= 180 + orb
+    }
+    def endsCloserThanStarts(first: Line, second: Line): Boolean = {
+      val startDist = CalcUtil.calcDistance(first.start, second.start)
+      val endDist = CalcUtil.calcDistance(first.end, second.end)
+      endDist <= startDist
     }
     def orderLine(line: Line): Line = {
       if (line.start.x + line.start.y <= line.end.x + line.end.y) { line } else { Line(line.end, line.start) }
     }
-    def pointsToCenter(from: Coord, to: Coord): Boolean = {
-      Math.abs(CalcUtil.calcDistance(from, cent)) > Math.abs(CalcUtil.calcDistance(to, cent))
-    }
-    val linesPointToCenter: List[Line] = connectorLines.filter(line => pointsToCenter(line.start, line.end))
-    val connectorPoints: List[Coord] = linesPointToCenter.map(_.start)
-    val connectorAngles: List[(Coord, Int)] = connectorPoints.map(c => (c, (CalcUtil.calcAngle(c, cent) + 360) % 360))
+    val connectorAngles: List[(Line, Int)] = connectorLines.map(l => (l, (CalcUtil.calcAngle(l.start, l.end) + 360) % 360))
     val lineOptions: List[Option[Line]] = for {
-      tup1: (Coord, Int) <- connectorAngles
-      tup2: (Coord, Int) <- connectorAngles
-    } yield { if (pointToEachother(tup1._2, tup2._2)) { Some(Line(tup1._1, tup2._1)) } else { None } }
-    val lines = lineOptions.filterNot(_ == None).map(_.get).map(orderLine(_)).filterNot(l => l.start == l.end)
-    val tree = TreeSet[Line]() ++ lines.toSet
-    val uniques = tree.toList
-    uniques.foreach(l => drawLine(g2d, l.start, l.end))
-    //FIXME
-    val connected: List[Coord] = uniques.map(_.start) ::: lines.map(_.end)
-    connectorLines.filterNot(l => connected.contains(l.start) || connected.contains(l.end))
+      tup1: (Line, Int) <- connectorAngles
+      tup2: (Line, Int) <- connectorAngles
+    } yield {
+      if (pointToEachother(tup1._2, tup2._2) && endsCloserThanStarts(tup1._1, tup2._1)) {
+        Some(Line(tup1._1.start, tup2._1.start))
+      } else {
+        None
+      }
+    }
+    val filtered = lineOptions.filterNot(_ == None).map(_.get)
+    println("filtered: " + filtered)
+    val distanced = filtered.map(l => (l, CalcUtil.calcDistance(l.start, l.end))).sortBy(_._2).map(_._1)
+    println("distanced: " + distanced)
+    val lines = distanced.map(orderLine(_)).distinct
+    println("lines: " + lines)
+    val uniq = lines.filterNot(l => lines.map(_.end).contains(l.start))
+    println("uniq: " + uniq)
+    val noMulti = uniq.map(_.start).distinct.map(s => uniq.find(s == _.start)).filterNot(_ == None).map(_.get)   
+    println("noMulti: " + noMulti)
+    noMulti.foreach(l => drawLine(g2d, l))
+    connectorLines.filterNot(l => noMulti.map(_.start).contains(l.start) || uniq.map(_.end).contains(l.start))
   }
 
   private def writeText(g2d: SVGGraphics2D, sentence: Sentence): Unit = g2d.drawString(sentence.mkString, 10F, FONT.getSize.floatValue)

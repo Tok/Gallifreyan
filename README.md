@@ -26,6 +26,7 @@ This application is running on OpenShift at: http://gallifreyan-9000.rhcloud.com
 
 ##### High Priority
 
+* Fix line connections
 * Improve code quality and reduce redundancies
 
 ##### Medium Priority
