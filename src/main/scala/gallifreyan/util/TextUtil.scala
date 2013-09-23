@@ -55,7 +55,7 @@ object TextUtil {
         newChar match {
           case c: Consonant =>
             if (!isLastEqual || isBeforeLastAndLastEqual) { makeWord(addAsNew, getNext) }
-            else { makeWord(addToLast, chars.tail) }
+            else { makeWord(addToLast, getNext) }
           case v: Vowel =>
             if ((!isLastEqual && isLastVowel) || isBeforeLastAndLastEqual) { makeWord(addAsNew, chars.tail) }
             else { makeWord(addToLast, chars.tail) }

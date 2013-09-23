@@ -82,7 +82,7 @@ object GenerationUtil {
       Circle(center, radius)
     }
     val wordSizeRatio = CalcUtil.calcSizeRatio(word.v.size)
-    val syllables = word.zipRots.map(z => generateSyllable(z._1, z._2, wordSizeRatio, wc))
+    val syllables = word.zipRots.map(z => generateSyllable(z._1, z._2, wordSizeRatio, wc, word.v.size))
     val punctation: Option[PunctationShape] = {
       val char = word.v.last.v.last
       if (!char.isInstanceOf[Punctation]) { None } else {
@@ -103,11 +103,11 @@ object GenerationUtil {
     WordShape(Some(arcCircle), syllables, punctation)
   }
 
-  private def generateSyllable(syl: Syllable, rot: Double, sizeRatio: Double, wc: Circle): SyllableShape = {
+  private def generateSyllable(syl: Syllable, rot: Double, sizeRatio: Double, wc: Circle, syllableCount: Int): SyllableShape = {
     val consonantShape: Option[ConsonantShape] = syl.v.head match {
       case con: Consonant =>
         val isDouble = !syl.v.tail.isEmpty && syl.v.tail.head == con
-        Some(generateConsonantShape(con, isDouble, sizeRatio, -rot, wc))
+        Some(generateConsonantShape(con, isDouble, sizeRatio, -rot, wc, syllableCount))
       case _ => None
     }
     val vowels = syl.v.filter(_.isInstanceOf[Vowel])
@@ -126,7 +126,7 @@ object GenerationUtil {
     SyllableShape(consonantShape, vowelShape)
   }
 
-  private def generateConsonantShape(con: Consonant, isDouble: Boolean, sizeRatio: Double, rot: Double, wc: Circle): ConsonantShape = {
+  private def generateConsonantShape(con: Consonant, isDouble: Boolean, sizeRatio: Double, rot: Double, wc: Circle, syllableCount: Int): ConsonantShape = {
     val original = makeConCircle(con, wc, false, sizeRatio)
     val originalOuter = if (isDouble) { Some(makeConCircle(con, wc, isDouble, sizeRatio)) } else { None }
     val circle = Circle(CalcUtil.rotate(original.center, rot, wc.center), original.radius)
@@ -146,26 +146,31 @@ object GenerationUtil {
         Arcs(inner, Some(Arc(outer.get, rotEd, rotSd)))
       } else { Arcs(inner, None) }
     }
-    def da: Double = Math.toRadians(10D)
-    def dda: Double = da * 2D
+    def angle: Double = {
+      syllableCount match {
+        case c: Int if (c == 1 || c == 3) => Math.toRadians(30D)
+        case c: Int if (c == 2 || c == 4) => Math.toRadians(45D)
+        case _ => Math.toRadians(60D)
+      }
+    }
     val lines: Option[Lines] = con.markType match {
       case MarkType.TRIPPLE_LINE =>
-        val leftStart = CalcUtil.rotate(CalcUtil.calcLineEnd(original, dda, Size.halfLine), rot, wc.center)
+        val leftStart = CalcUtil.rotate(CalcUtil.calcLineEnd(original, angle, Size.halfLine), rot, wc.center)
         val middleStart = CalcUtil.rotate(CalcUtil.calcLineEnd(original, 0D, Size.halfLine), rot, wc.center)
-        val rightStart = CalcUtil.rotate(CalcUtil.calcLineEnd(original, -dda, Size.halfLine), rot, wc.center)
-        val leftEnd = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, dda, Size.halfLine), rot, wc.center)
+        val rightStart = CalcUtil.rotate(CalcUtil.calcLineEnd(original, -angle, Size.halfLine), rot, wc.center)
+        val leftEnd = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, angle, Size.halfLine), rot, wc.center)
         val middleEnd = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, 0D, Size.halfLine), rot, wc.center)
-        val rightEnd = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, -dda, Size.halfLine), rot, wc.center)
+        val rightEnd = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, -angle, Size.halfLine), rot, wc.center)
         Some(Lines(Some(Line(leftStart, leftEnd)), Some(Line(middleStart, middleEnd)), Some(Line(rightStart, rightEnd))))
       case MarkType.LINE =>
         val start = CalcUtil.rotate(CalcUtil.calcLineEnd(original, 0D, Size.halfLine), rot, wc.center)
         val end = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, 0D, Size.halfLine), rot, wc.center)
         Some(Lines(None, Some(Line(start, end)), None))
       case MarkType.DOUBLE_LINE =>
-        val leftStart = CalcUtil.rotate(CalcUtil.calcLineEnd(original, da, Size.halfLine), rot, wc.center)
-        val rightStart = CalcUtil.rotate(CalcUtil.calcLineEnd(original, -da, Size.halfLine), rot, wc.center)
-        val leftEnd = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, da, Size.halfLine), rot, wc.center)
-        val rightEnd = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, -da, Size.halfLine), rot, wc.center)
+        val leftStart = CalcUtil.rotate(CalcUtil.calcLineEnd(original, angle, Size.halfLine), rot, wc.center)
+        val rightStart = CalcUtil.rotate(CalcUtil.calcLineEnd(original, -angle, Size.halfLine), rot, wc.center)
+        val leftEnd = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, angle, Size.halfLine), rot, wc.center)
+        val rightEnd = CalcUtil.rotate(CalcUtil.calcLineEnd(connCircle, -angle, Size.halfLine), rot, wc.center)
         Some(Lines(Some(Line(leftStart, leftEnd)), None, Some(Line(rightStart, rightEnd))))
       case _ => None
     }
@@ -321,11 +326,7 @@ object GenerationUtil {
     val rat = if (isDouble) { con.circleType.doubleRatio } else { con.circleType.ratio }
     val radius = (wordCircle.radius * rat).intValue
     val fixedRadius = (radius * sizeRatio).intValue
-    val fixedCenter = if (con.circleType.equals(CircleType.STRIKED)) {
-      wordCircle.center.addToY(wordCircle.radius)
-    } else {
-      wordCircle.center.addToY(offset).addToY(radius - (fixedRadius))
-    }
+    val fixedCenter = wordCircle.center.addToY(wordCircle.radius)
     Circle(fixedCenter, fixedRadius)
   }
 

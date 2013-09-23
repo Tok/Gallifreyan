@@ -162,6 +162,14 @@ class TextUtilSuite extends AbstractTester {
     assert(TextUtil.makeWord("QU").toString === "QU")
   }
 
+  test("Double Doubles") {
+    assert(TextUtil.makeWord("CHCH").toString === "CHCH")
+    assert(TextUtil.makeWord("SHSH").toString === "SHSH")
+    assert(TextUtil.makeWord("THTH").toString === "THTH")
+    assert(TextUtil.makeWord("NGNG").toString === "NGNG")
+    assert(TextUtil.makeWord("QUQU").toString === "QUQU")    
+  }
+
   test("Words") {
     assert(TextUtil.makeWord("BOW").toString === "BO_W")
     assert(TextUtil.makeWord("TIES").toString === "TI_E_S")
