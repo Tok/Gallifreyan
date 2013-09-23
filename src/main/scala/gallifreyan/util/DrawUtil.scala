@@ -47,10 +47,8 @@ object DrawUtil {
     if (!sentence.v.isEmpty) {
       val sentenceShape = GenerationUtil.generateSentence(sentence)
       drawSentenceShape(g2d, sentenceShape)
+      if (!stubs) { connectLinesToCircle(g2d, GenerationUtil.separateLines(sentenceShape), sentence) }
       if (addText) { writeText(g2d, sentence) }
-      if (!stubs) {
-        connectLinesToCircle(g2d, GenerationUtil.separateLines(sentenceShape), sentence)
-      }
     }
     g2d.dispose
   }

@@ -56,14 +56,12 @@ object GenerationUtil {
     }
     def getRotated(angle: Double): Circle = divots.get(angle).get.circle
     val outer = Sentence.outer(Size.lineWidth)
-
     val sentSizeRatio = CalcUtil.calcSizeRatio(sentence.v.size)
     val offset = (Sentence.circle.radius * 0.6D).intValue
     val rad = (Sentence.circle.radius * 0.35D * sentSizeRatio).intValue
-
     val words = sentence.zipRots.map(z => generateWord(z._1, z._2, offset, rad, getRotated(z._2), outer))
     val arcs = divots.values.toList.map(a => Arc(Sentence.circle, a.start, a.end))
-    val switched = switchEndpoints(arcs)
+    val switched = switchEndpoints(arcs, Sentence.circle, arcs.size >= 5)
     val arcCircle = ArcCircle(Sentence.circle, switched.map(_.start), switched.map(_.end))
     SentenceShape(Some(arcCircle), Sentence.outer(Size.lineWidth), words, Some(divots.values.toList))
   }
@@ -74,7 +72,7 @@ object GenerationUtil {
     } else {
       val sizeRatio = CalcUtil.calcSizeRatio(word.v.size)
       val wordShape = generateWord(word, 0D, 0, Word.circle.radius, Word.circle, Word.outer(Size.lineWidth))
-      SentenceShape(None, Word.outer(Size.lineWidth), List(wordShape), None)      
+      SentenceShape(None, Word.outer(Size.lineWidth), List(wordShape), None)
     }
   }
 
@@ -100,7 +98,7 @@ object GenerationUtil {
     }
     val points = syllables.map(s => getStartAndEnd(s.consonant))
     val arcs = points.filter(_.isDefined).map(_.get).map(tup => Arc(wc, tup._1, tup._2))
-    val switched = switchEndpoints(arcs)
+    val switched = switchEndpoints(arcs, wc, false)
     val arcCircle = ArcCircle(wc, switched.map(_.start), switched.map(_.end))
     WordShape(Some(arcCircle), syllables, punctation)
   }
@@ -296,13 +294,23 @@ object GenerationUtil {
     lefts ::: middles ::: rights ::: vowLines
   }
 
-  private def switchEndpoints(divots: List[Arc]): List[Arc] = {
-    if(divots.isEmpty) { Nil } else {
-      val first = Arc(Sentence.circle, divots.last.start, divots.head.end)
+  private def switchEndpoints(divots: List[Arc], circle: Circle, reverse: Boolean): List[Arc] = {
+    if (divots.isEmpty) { Nil } else {
+      val first = if (reverse) {
+        Arc(circle, divots.head.start, divots.last.end)
+      } else {
+        Arc(circle, divots.last.start, divots.head.end)
+      }
       @tailrec
       def rest(l: List[Arc], accu: List[Arc]): List[Arc] = {
         if (l.size <= 1) { accu }
-        else { rest(l.tail, accu ::: List(Arc(Sentence.circle, l.head.start, l.tail.head.end))) }
+        else {
+          if (reverse) {
+            rest(l.tail, accu ::: List(Arc(circle, l.tail.head.start, l.head.end)))
+          } else {
+            rest(l.tail, accu ::: List(Arc(circle, l.head.start, l.tail.head.end)))
+          }
+        }
       }
       rest(divots, List(first))
     }
