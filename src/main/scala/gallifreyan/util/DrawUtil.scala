@@ -35,8 +35,6 @@ object DrawUtil {
   val STROKE = new BasicStroke(Size.lineWidth)
   val FONT = new Font(Font.MONOSPACED, Font.BOLD, 30)
 
-  type LineSets = List[Set[Line]]
-
   def drawSentence(g2d: SVGGraphics2D, sentence: Sentence, fg: Color, bg: Color, addText: Boolean, stubs: Boolean): Unit = {
     //g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
     //g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY)
@@ -47,7 +45,14 @@ object DrawUtil {
     if (!sentence.v.isEmpty) {
       val sentenceShape = GenerationUtil.generateSentence(sentence)
       drawSentenceShape(g2d, sentenceShape)
-      if (!stubs) { connectLinesToCircle(g2d, GenerationUtil.separateLines(sentenceShape), sentence) }
+      val separatedLines = GenerationUtil.separateLines(sentenceShape)
+      if (stubs) {
+        markStubs(g2d, separatedLines)
+      } else {
+        //val rest = connectLines(g2d, separatedLines)
+        //connectLinesToCircle(g2d, rest, sentence)
+        connectLinesToCircle(g2d, separatedLines, sentence)
+      }
       if (addText) { writeText(g2d, sentence) }
     }
     g2d.dispose
@@ -86,12 +91,10 @@ object DrawUtil {
         case a: Arcs => drawArcs(g2d, a)
         case c: Circles => drawCircles(g2d, c)
       }
-      cs.lines.foreach(drawLines(g2d, _))
       cs.dots.foreach(drawDots(g2d, _))
     }
     def drawVowelShape(vs: VowelShape): Unit = {
       drawCircles(g2d, vs.circles)
-      vs.line.foreach(drawLine(g2d, _))
     }
     syl.consonant.foreach(drawConsonantShape(_))
     syl.vowel.foreach(drawVowelShape(_))
@@ -119,7 +122,8 @@ object DrawUtil {
     l.right.foreach(drawLine(g2d, _))
   }
 
-  @deprecated("Rewrite this", "2013-09-22")
+  private def markStubs(g2d: SVGGraphics2D, connectorLines: List[Line]): Unit = connectorLines.foreach(drawLine(g2d, _))
+
   private def connectLinesToCircle(g2d: SVGGraphics2D, connectorLines: List[Line], sentence: Sentence): Unit = {
     def circle: Circle = if (sentence.isSingleWord) { Word.outer(Size.lineWidth) } else { Sentence.outer(Size.lineWidth) }
     def calcInter(line: Line): Coord = CalcUtil.calcIntersection(line.start, line.end, circle)
@@ -139,8 +143,7 @@ object DrawUtil {
    * 3. connect the closest pairs and make sure that every connector is only connected once
    * 4. return the lines that have not been connected
    */
-  @deprecated("Rewrite this", "2013-09-22")
-  private def connectLines(g2d: SVGGraphics2D, connectorLines: LineSets): List[Line] = {
+  private def connectLines(g2d: SVGGraphics2D, connectorLines: List[Line]): List[Line] = {
     val orb = 20
     val cent = Sentence.circle.center
     def pointToEachother(first: Int, second: Int): Boolean = {
@@ -153,7 +156,7 @@ object DrawUtil {
     def pointsToCenter(from: Coord, to: Coord): Boolean = {
       Math.abs(CalcUtil.calcDistance(from, cent)) > Math.abs(CalcUtil.calcDistance(to, cent))
     }
-    val linesPointToCenter: List[Line] = connectorLines.flatten.filter(line => pointsToCenter(line.start, line.end))
+    val linesPointToCenter: List[Line] = connectorLines.filter(line => pointsToCenter(line.start, line.end))
     val connectorPoints: List[Coord] = linesPointToCenter.map(_.start)
     val connectorAngles: List[(Coord, Int)] = connectorPoints.map(c => (c, (CalcUtil.calcAngle(c, cent) + 360) % 360))
     val lineOptions: List[Option[Line]] = for {
@@ -166,7 +169,7 @@ object DrawUtil {
     uniques.foreach(l => drawLine(g2d, l.start, l.end))
     //FIXME
     val connected: List[Coord] = uniques.map(_.start) ::: lines.map(_.end)
-    connectorLines.flatten.filterNot(l => connected.contains(l.start) || connected.contains(l.end))
+    connectorLines.filterNot(l => connected.contains(l.start) || connected.contains(l.end))
   }
 
   private def writeText(g2d: SVGGraphics2D, sentence: Sentence): Unit = g2d.drawString(sentence.mkString, 10F, FONT.getSize.floatValue)

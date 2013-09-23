@@ -26,9 +26,6 @@ This application is running on OpenShift at: http://gallifreyan-9000.rhcloud.com
 
 ##### High Priority
 
-* Fix divot problem with five worded sentences
-* Replace obsolete methods
-* Calculate and draw direct line connections
 * Improve code quality and reduce redundancies
 
 ##### Medium Priority
