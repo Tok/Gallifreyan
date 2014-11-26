@@ -1,7 +1,8 @@
 # Circular Gallifreyan Transliterator
 
-#### WARNING: Work in progress.
-#### This application isn't finished and may therefore give false results.
+#### WARNING: Work in progress. This application isn't finished and <s>may</s> will therefore give false results.
+#### The app is temporarily deactivated. See https://github.com/Tok/Gallifreyan/issues/2
+<s>This application is running on OpenShift at: http://gallifreyan-9000.rhcloud.com</s>
 
 <pre>
             _ _
@@ -18,11 +19,12 @@
        '- . _ _ . -'
 </pre>
 
-This application is running on OpenShift at: http://gallifreyan-9000.rhcloud.com
-
 ---------------------------------------
 
 #### TODO
+
+##### Ultra High Priority
+* Fix the transliteration
 
 ##### High Priority
 
